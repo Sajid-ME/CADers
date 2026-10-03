@@ -1,0 +1,9 @@
+CADers website Idea:
+
+Need a website for CADers that'll be the official website. As, it is official it should be interacting, smooth, secured and user friendly. Now, the cader website should have:
+1. A CADers logo and a smooth ui with light animations.
+2. A slideshow of achievements that'll be shown continuosly.
+3. Some sections like, Home, Achievements, Events, Voice from Moderator and Faculty advisor(Will be shown like slide show), Feedback, Contact us, Map location.
+4. Highly secured Login system for students and they'll be given some username and passwords so that only those who enrolled can login. Also, they'll be able to see in which course they've enrolled and can see the lecture slides, hw, cw etc.
+5. An admin page only for admins who can see who has logged in, can update events, dates, slides, hw, cw etc.
+6. The most important is feedback. Students both who enrolled and haven't can provide their feedback on the course or syllabus etc. Their feedback will be arranged in a spreadsheet.
