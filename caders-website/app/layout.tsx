@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { createClient } from "@/lib/supabase/server";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -12,7 +13,6 @@ export const metadata: Metadata = {
     "Official website of CADers, KUET — promoting engineering design and producing quality designers.",
 };
 
-// Runs before React hydrates. Prevents the flash of the wrong theme.
 const themeInitScript = `
   try {
     var stored = localStorage.getItem('theme');
@@ -23,11 +23,31 @@ const themeInitScript = `
   } catch (e) {}
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let profile: {
+    username: string;
+    full_name: string;
+    role: string;
+  } | null = null;
+
+  if (user) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("username, full_name, role")
+      .eq("id", user.id)
+      .single();
+    profile = data;
+  }
+
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
@@ -37,7 +57,7 @@ export default function RootLayout({
         className="font-sans antialiased bg-surface text-surface-on"
         suppressHydrationWarning
       >
-        <Navbar />
+        <Navbar user={profile} />
         <main className="min-h-screen">{children}</main>
         <Footer />
       </body>
