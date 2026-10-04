@@ -8,40 +8,51 @@ export type LoginState = {
   error: string | null;
 };
 
-function usernameToEmail(username: string) {
-  return `${username.toLowerCase().trim()}@caders.local`;
+/**
+ * Accepts either:
+ *   - a plain username (e.g. "test23")  → becomes "test23@caders.local"
+ *   - a full email (e.g. "test23@me.com") → used as-is
+ */
+function toLoginEmail(input: string) {
+  const trimmed = input.trim().toLowerCase();
+  if (trimmed.includes("@")) return trimmed;
+  return `${trimmed}@caders.local`;
 }
 
 export async function loginAction(
   _prev: LoginState,
   formData: FormData
 ): Promise<LoginState> {
-  const username = String(formData.get("username") || "").trim();
+  const identifier = String(formData.get("username") || "").trim();
   const password = String(formData.get("password") || "");
 
-  if (!username || !password) {
+  if (!identifier || !password) {
     return { error: "Please enter both username and password." };
   }
 
+  const email = toLoginEmail(identifier);
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: usernameToEmail(username),
+    email,
     password,
   });
 
   if (error || !data.user) {
-    return { error: "Invalid username or password." };
+    console.error("[LOGIN ERROR]", { email, error });
+    return {
+      error: error?.message?.includes("Invalid login")
+        ? "Invalid username or password."
+        : `Login failed: ${error?.message ?? "unknown error"}`,
+    };
   }
 
-  // Fetch role
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", data.user.id)
     .single();
 
-  // Log the login (best-effort, ignore errors)
   try {
     const h = await headers();
     await supabase.from("login_logs").insert({
