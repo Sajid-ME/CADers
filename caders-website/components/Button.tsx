@@ -22,13 +22,9 @@ type Props = {
 
 type RippleItem = { id: number; x: number; y: number; size: number };
 
-/**
- * Full-button hover highlight — the state layer + ripple now sit on the
- * outer element, so the ENTIRE button (not just the text) lights up.
- */
 const variants: Record<Variant, string> = {
   filled:
-    "bg-primary text-white hover:bg-primary-dark hover:shadow-elev-2 active:shadow-elev-1",
+    "bg-primary text-primary-on hover:bg-primary-dark hover:shadow-elev-2 active:shadow-elev-1",
   tonal:
     "bg-primary-container text-primary-on-container hover:brightness-95 hover:shadow-elev-1",
   outlined:

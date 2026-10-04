@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import Button from "./Button";
+import ThemeToggle from "./ThemeToggle";
 
 const links = [
   { href: "/", label: "Home" },
@@ -37,7 +38,7 @@ export default function Navbar() {
     >
       <nav className="container flex items-center justify-between h-16">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-m-md bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center font-bold shadow-elev-1 group-hover:shadow-elev-2 transition-shadow">
+          <div className="w-10 h-10 rounded-m-md bg-gradient-to-br from-primary to-secondary text-primary-on flex items-center justify-center font-bold shadow-elev-1 group-hover:shadow-elev-2 transition-shadow">
             C
           </div>
           <span className="text-title-lg text-primary font-semibold">
@@ -66,19 +67,23 @@ export default function Navbar() {
           })}
         </ul>
 
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-3">
+          <ThemeToggle />
           <Button href="/login" variant="outlined" size="sm">
             Login
           </Button>
         </div>
 
-        <button
-          className="md:hidden p-2 rounded-full text-surface-on hover:bg-primary/10 transition"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
-          {open ? <X /> : <Menu />}
-        </button>
+        <div className="flex md:hidden items-center gap-1">
+          <ThemeToggle />
+          <button
+            className="p-2 rounded-full text-surface-on hover:bg-primary/10 transition"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle menu"
+          >
+            {open ? <X /> : <Menu />}
+          </button>
+        </div>
       </nav>
 
       {open && (

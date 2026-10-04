@@ -25,7 +25,7 @@ export default function AchievementSlideshow({
 
   return (
     <div className="relative rounded-m-xl bg-primary-container p-8 md:p-14 overflow-hidden min-h-[240px] flex items-center shadow-elev-1">
-      <div className="absolute top-6 right-8 text-primary/15">
+      <div className="absolute top-6 right-8 text-primary-on-container/20">
         <Trophy size={96} strokeWidth={1.2} />
       </div>
 

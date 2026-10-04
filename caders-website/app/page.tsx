@@ -1,6 +1,5 @@
-import Link from "next/link";
-import Hero from "@/components/Hero";
 import Section from "@/components/Section";
+import Hero from "@/components/Hero";
 import AchievementSlideshow from "@/components/AchievementSlideshow";
 import VoicesSlideshow from "@/components/VoicesSlideshow";
 import EventCard from "@/components/EventCard";
@@ -53,11 +52,11 @@ export default function HomePage() {
       </Section>
 
       <Section>
-        <div className="rounded-m-xl bg-primary text-white p-10 md:p-16 text-center shadow-elev-2">
+        <div className="rounded-m-xl bg-primary text-primary-on p-10 md:p-16 text-center shadow-elev-2">
           <h2 className="text-headline-md md:text-headline-lg">
             Have feedback? We&apos;re listening.
           </h2>
-          <p className="mt-4 text-body-lg text-white/85 max-w-xl mx-auto">
+          <p className="mt-4 text-body-lg text-primary-on/85 max-w-xl mx-auto">
             Whether you&apos;re enrolled or just curious — share your thoughts on
             our courses and syllabus. Anonymous and always welcome.
           </p>

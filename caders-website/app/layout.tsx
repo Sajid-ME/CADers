@@ -12,6 +12,17 @@ export const metadata: Metadata = {
     "Official website of CADers, KUET — promoting engineering design and producing quality designers.",
 };
 
+// Runs before React hydrates. Prevents the flash of the wrong theme.
+const themeInitScript = `
+  try {
+    var stored = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+`;
+
 export default function RootLayout({
   children,
 }: {
@@ -19,8 +30,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
-        className="font-sans antialiased bg-white text-ink"
+        className="font-sans antialiased bg-surface text-surface-on"
         suppressHydrationWarning
       >
         <Navbar />

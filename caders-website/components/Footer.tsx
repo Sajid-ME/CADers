@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container py-14 grid gap-10 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-m-md bg-primary text-white flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-m-md bg-gradient-to-br from-primary to-secondary text-primary-on flex items-center justify-center font-bold">
               C
             </div>
             <h3 className="text-title-lg text-primary">CADers</h3>

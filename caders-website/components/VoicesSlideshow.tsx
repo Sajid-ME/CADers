@@ -21,7 +21,7 @@ export default function VoicesSlideshow({ items }: { items: Voice[] }) {
 
   return (
     <div className="relative rounded-m-xl bg-surface-container p-8 md:p-14 border border-outline-variant shadow-elev-1 min-h-[280px] flex flex-col justify-center">
-      <Quote className="text-primary/25 mb-6" size={44} />
+      <Quote className="text-primary/30 mb-6" size={44} />
 
       <AnimatePresence mode="wait">
         <motion.div

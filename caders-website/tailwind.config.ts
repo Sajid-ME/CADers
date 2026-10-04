@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,34 +10,38 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#1B5E20",
-          dark: "#154A1A",
-          light: "#4CAF50",
-          on: "#FFFFFF",
-          container: "#A5D6A7",
-          "on-container": "#002106",
+          DEFAULT: "rgb(var(--color-primary) / <alpha-value>)",
+          dark: "rgb(var(--color-primary-dark) / <alpha-value>)",
+          light: "rgb(var(--color-primary-light) / <alpha-value>)",
+          on: "rgb(var(--color-primary-on) / <alpha-value>)",
+          container: "rgb(var(--color-primary-container) / <alpha-value>)",
+          "on-container":
+            "rgb(var(--color-primary-on-container) / <alpha-value>)",
         },
         secondary: {
-          DEFAULT: "#4CAF50",
-          on: "#FFFFFF",
-          container: "#C8E6C9",
-          "on-container": "#0A2E0F",
+          DEFAULT: "rgb(var(--color-secondary) / <alpha-value>)",
+          on: "rgb(var(--color-secondary-on) / <alpha-value>)",
+          container: "rgb(var(--color-secondary-container) / <alpha-value>)",
+          "on-container":
+            "rgb(var(--color-secondary-on-container) / <alpha-value>)",
         },
         surface: {
-          DEFAULT: "#FBFDF8",
-          variant: "#E8F5E9",
-          container: "#F1F8F2",
-          "container-high": "#E8F5E9",
-          on: "#1C1B1F",
-          "on-variant": "#49454F",
+          DEFAULT: "rgb(var(--color-surface) / <alpha-value>)",
+          variant: "rgb(var(--color-surface-variant) / <alpha-value>)",
+          container: "rgb(var(--color-surface-container) / <alpha-value>)",
+          "container-high":
+            "rgb(var(--color-surface-container-high) / <alpha-value>)",
+          on: "rgb(var(--color-surface-on) / <alpha-value>)",
+          "on-variant":
+            "rgb(var(--color-surface-on-variant) / <alpha-value>)",
         },
         outline: {
-          DEFAULT: "#79747E",
-          variant: "#CAC4D0",
+          DEFAULT: "rgb(var(--color-outline) / <alpha-value>)",
+          variant: "rgb(var(--color-outline-variant) / <alpha-value>)",
         },
         ink: {
-          DEFAULT: "#1C1B1F",
-          soft: "#49454F",
+          DEFAULT: "rgb(var(--color-surface-on) / <alpha-value>)",
+          soft: "rgb(var(--color-surface-on-variant) / <alpha-value>)",
         },
       },
       boxShadow: {
