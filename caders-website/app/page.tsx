@@ -17,8 +17,7 @@ export default async function HomePage() {
     supabase
       .from("events")
       .select("id, title, date, venue, description")
-      .gte("date", new Date().toISOString().slice(0, 10))
-      .order("date", { ascending: true })
+      .order("date", { ascending: false })
       .limit(3),
     supabase
       .from("voices")
@@ -53,7 +52,7 @@ export default async function HomePage() {
       </Section>
 
       <Section
-        title="Upcoming Events"
+        title="Recent & Upcoming Events"
         subtitle="Join our workshops, bootcamps, and design sprints."
         className="bg-surface-container"
       >
@@ -65,7 +64,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <p className="text-center text-body-md text-surface-on-variant">
-            No upcoming events right now.
+            No events yet.
           </p>
         )}
         <div className="text-center mt-10">
