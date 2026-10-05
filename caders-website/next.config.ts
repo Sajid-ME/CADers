@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    serverActions: {
+      // 20 MB — enough for most PDF/PPTX files
+      bodySizeLimit: "20mb",
+    },
+  },
 };
 
 export default nextConfig;
