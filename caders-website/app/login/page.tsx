@@ -18,7 +18,7 @@ export default function LoginPage() {
           {/* Logo + heading */}
           <div className="flex flex-col items-center text-center mb-8">
             <img
-              src="/logo.jpg"
+              src="/logo.png"
               alt="CADers logo"
               className="h-20 w-auto object-contain mb-5"
             />
