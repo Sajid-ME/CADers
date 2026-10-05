@@ -43,7 +43,7 @@ export default function ContactPage() {
             {
               icon: <Phone className="text-primary mt-1" />,
               title: "Phone",
-              body: <>+880 1XXX-XXXXXX</>,
+              body: <>+880 1521719758</>,
             },
           ].map((item) => (
             <div

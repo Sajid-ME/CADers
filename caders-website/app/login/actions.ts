@@ -3,20 +3,20 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { USERNAME_DOMAIN } from "@/lib/departments";
 
 export type LoginState = {
   error: string | null;
 };
 
 /**
- * Accepts either:
- *   - a plain username (e.g. "test23")  → becomes "test23@caders.local"
- *   - a full email (e.g. "test23@me.com") → used as-is
+ * Accepts a bare username, or a full email. Tries the new @caders.kuet
+ * domain first, then falls back to @caders.local for legacy accounts.
  */
-function toLoginEmail(input: string) {
-  const trimmed = input.trim().toLowerCase();
-  if (trimmed.includes("@")) return trimmed;
-  return `${trimmed}@caders.local`;
+function candidates(identifier: string): string[] {
+  const trimmed = identifier.trim().toLowerCase();
+  if (trimmed.includes("@")) return [trimmed];
+  return [`${trimmed}${USERNAME_DOMAIN}`, `${trimmed}@caders.local`];
 }
 
 export async function loginAction(
@@ -30,33 +30,45 @@ export async function loginAction(
     return { error: "Please enter both username and password." };
   }
 
-  const email = toLoginEmail(identifier);
   const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  let signedInUser: { id: string } | null = null;
+  let lastError: string | null = null;
 
-  if (error || !data.user) {
-    console.error("[LOGIN ERROR]", { email, error });
+  for (const email of candidates(identifier)) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (!error && data.user) {
+      signedInUser = { id: data.user.id };
+      break;
+    }
+
+    lastError = error?.message ?? null;
+    console.error("[LOGIN attempt failed]", { email, error: lastError });
+  }
+
+  if (!signedInUser) {
     return {
-      error: error?.message?.includes("Invalid login")
-        ? "Invalid username or password."
-        : `Login failed: ${error?.message ?? "unknown error"}`,
+      error:
+        lastError && !lastError.toLowerCase().includes("invalid")
+          ? `Login failed: ${lastError}`
+          : "Invalid username or password.",
     };
   }
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", data.user.id)
+    .eq("id", signedInUser.id)
     .single();
 
   try {
     const h = await headers();
     await supabase.from("login_logs").insert({
-      user_id: data.user.id,
+      user_id: signedInUser.id,
       user_agent: h.get("user-agent") ?? null,
     });
   } catch {

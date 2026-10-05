@@ -67,20 +67,28 @@ export async function createStudentAction(
   if (!guard.ok) return { error: guard.error };
 
   const full_name = String(formData.get("full_name") || "").trim();
+  const surname_base = String(formData.get("surname_base") || "")
+    .trim()
+    .toLowerCase();
+  const dept_code = String(formData.get("dept_code") || "")
+    .trim()
+    .toUpperCase();
+  const roll_number = String(formData.get("roll_number") || "").trim();
   const username = String(formData.get("username") || "")
     .trim()
     .toLowerCase();
-  const department = String(formData.get("department") || "").trim();
-  const roll_number = String(formData.get("roll_number") || "").trim();
   const providedPassword = String(formData.get("password") || "").trim();
 
-  if (!full_name || !username) {
-    return { error: "Full name and username are required." };
+  if (!full_name || !surname_base || !dept_code || !roll_number || !username) {
+    return {
+      error: "Full name, surname, department, roll number are all required.",
+    };
   }
-  if (!/^[a-z0-9_.-]{3,32}$/.test(username)) {
+
+  if (!/^[a-z0-9]{4,40}$/.test(username)) {
     return {
       error:
-        "Username must be 3–32 chars and may only contain a–z, 0–9, _, ., and -.",
+        "Username may only contain a–z, 0–9 and must be 4–40 characters.",
     };
   }
 
@@ -90,8 +98,9 @@ export async function createStudentAction(
   }
 
   const admin = createAdminClient();
-  const email = `${username}@caders.local`;
+  const email = `${username}@caders.kuet`;
 
+  // Check username uniqueness
   const { data: existing } = await admin
     .from("profiles")
     .select("id")
@@ -109,8 +118,8 @@ export async function createStudentAction(
     user_metadata: {
       username,
       full_name,
-      department: department || null,
-      roll_number: roll_number || null,
+      department: dept_code,
+      roll_number,
       role: "student",
     },
   });
@@ -124,7 +133,7 @@ export async function createStudentAction(
 
   return {
     error: null,
-    success: `✅ Created "${username}". Password: "${password}" — copy it now; you won't see it again.`,
+    success: `✅ Created "${email}". Password: "${password}" — copy it now; you won't see it again.`,
   };
 }
 
@@ -330,4 +339,163 @@ export async function deleteMaterialAction(formData: FormData) {
   revalidatePath("/admin/materials");
   revalidatePath("/admin");
   revalidatePath("/dashboard");
+}
+// =====================================================================
+// Events
+// =====================================================================
+
+export async function createEventAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const guard = await assertAdmin();
+  if (!guard.ok) return { error: guard.error };
+
+  const title = String(formData.get("title") || "").trim();
+  const date = String(formData.get("date") || "").trim();
+  const venue = String(formData.get("venue") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+
+  if (!title || !date || !venue) {
+    return { error: "Title, date, and venue are required." };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return { error: "Date must be in YYYY-MM-DD format." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("events").insert({
+    title,
+    date,
+    venue,
+    description: description || null,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/events");
+  revalidatePath("/events");
+  revalidatePath("/");
+
+  return { error: null, success: `✅ Event "${title}" created.` };
+}
+
+export async function deleteEventAction(formData: FormData) {
+  const guard = await assertAdmin();
+  if (!guard.ok) return;
+
+  const id = String(formData.get("event_id") || "").trim();
+  if (!id) return;
+
+  const supabase = await createClient();
+  await supabase.from("events").delete().eq("id", id);
+
+  revalidatePath("/admin/events");
+  revalidatePath("/events");
+  revalidatePath("/");
+}
+
+// =====================================================================
+// Achievements
+// =====================================================================
+
+export async function createAchievementAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const guard = await assertAdmin();
+  if (!guard.ok) return { error: guard.error };
+
+  const title = String(formData.get("title") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+  const date = String(formData.get("date") || "").trim();
+
+  if (!title) return { error: "Title is required." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("achievements").insert({
+    title,
+    description: description || null,
+    date: date || null,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/achievements");
+  revalidatePath("/achievements");
+  revalidatePath("/");
+
+  return { error: null, success: `✅ Achievement "${title}" added.` };
+}
+
+export async function deleteAchievementAction(formData: FormData) {
+  const guard = await assertAdmin();
+  if (!guard.ok) return;
+
+  const id = String(formData.get("achievement_id") || "").trim();
+  if (!id) return;
+
+  const supabase = await createClient();
+  await supabase.from("achievements").delete().eq("id", id);
+
+  revalidatePath("/admin/achievements");
+  revalidatePath("/achievements");
+  revalidatePath("/");
+}
+
+// =====================================================================
+// Voices
+// =====================================================================
+
+export async function createVoiceAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const guard = await assertAdmin();
+  if (!guard.ok) return { error: guard.error };
+
+  const type = String(formData.get("type") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+  const designation = String(formData.get("designation") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+  const order_index = Number(formData.get("order_index") || 0) || 0;
+
+  if (!name || !message) {
+    return { error: "Name and message are required." };
+  }
+  if (type !== "moderator" && type !== "faculty") {
+    return { error: "Please choose Moderator or Faculty." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("voices").insert({
+    type,
+    name,
+    designation: designation || null,
+    message,
+    order_index,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/voices");
+  revalidatePath("/voices");
+  revalidatePath("/");
+
+  return { error: null, success: `✅ Voice "${name}" added.` };
+}
+
+export async function deleteVoiceAction(formData: FormData) {
+  const guard = await assertAdmin();
+  if (!guard.ok) return;
+
+  const id = String(formData.get("voice_id") || "").trim();
+  if (!id) return;
+
+  const supabase = await createClient();
+  await supabase.from("voices").delete().eq("id", id);
+
+  revalidatePath("/admin/voices");
+  revalidatePath("/voices");
+  revalidatePath("/");
 }

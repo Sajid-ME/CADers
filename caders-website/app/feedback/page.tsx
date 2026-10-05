@@ -1,28 +1,70 @@
-"use client";
-
-import { useState } from "react";
+import Link from "next/link";
 import Section from "@/components/Section";
 import Button from "@/components/Button";
+import { createClient } from "@/lib/supabase/server";
+import FeedbackForm from "./FeedbackForm";
 
-export default function FeedbackPage() {
-  const [message, setMessage] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [focused, setFocused] = useState(false);
+export const metadata = {
+  title: "Feedback | CADers",
+  description: "Share your feedback on CADers courses and syllabus.",
+};
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!message.trim()) return;
-    setLoading(true);
+export default async function FeedbackPage() {
+  const supabase = await createClient();
 
-    // 🔌 TODO (Phase 4): send `message` to Google Apps Script endpoint
-    console.log("Feedback submitted:", message);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-      setMessage("");
-    }, 600);
+  // Not logged in
+  if (!user) {
+    return (
+      <Section
+        title="Share Your Feedback"
+        subtitle="Reserved for enrolled CADers students and committee members."
+      >
+        <GateCard
+          icon="🔒"
+          title="Login required"
+          body="Feedback is open to enrolled CADers students and committee members. Please sign in to continue."
+          ctaHref="/login"
+          ctaLabel="Sign in"
+        />
+      </Section>
+    );
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdmin =
+    profile?.role === "admin" || profile?.role === "super_admin";
+
+  if (!isAdmin) {
+    const { count } = await supabase
+      .from("enrollments")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", user.id);
+
+    if (!count || count === 0) {
+      return (
+        <Section
+          title="Share Your Feedback"
+          subtitle="Reserved for enrolled CADers students and committee members."
+        >
+          <GateCard
+            icon="📚"
+            title="Enrollment required"
+            body="Feedback is open to students who are enrolled in at least one CADers course. Contact an admin if you believe this is a mistake."
+            ctaHref="/contact"
+            ctaLabel="Contact us"
+          />
+        </Section>
+      );
+    }
   }
 
   return (
@@ -31,72 +73,35 @@ export default function FeedbackPage() {
       subtitle="Anonymous. Honest. Welcome. Help us improve our courses and syllabus."
     >
       <div className="max-w-2xl mx-auto">
-        {submitted ? (
-          <div className="rounded-m-xl bg-primary-container border border-primary/20 p-10 text-center shadow-elev-1">
-            <h3 className="text-title-lg text-primary-on-container">
-              Thank you for your feedback!
-            </h3>
-            <p className="mt-3 text-body-md text-primary-on-container/80">
-              Your response has been recorded anonymously.
-            </p>
-            <div className="mt-8 inline-block">
-              <Button
-                variant="outlined"
-                size="md"
-                onClick={() => setSubmitted(false)}
-              >
-                Submit another
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="rounded-m-xl bg-surface-container border border-outline-variant p-8 shadow-elev-1"
-          >
-            {/* Material filled text field */}
-            <div className="relative">
-              <textarea
-                id="feedback"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                rows={7}
-                required
-                placeholder=" "
-                className="peer w-full rounded-m-md bg-surface-variant border border-outline px-4 pt-6 pb-3 text-body-lg text-surface-on focus:outline-none focus:border-primary focus:border-2 transition-all duration-m-short ease-m-standard resize-none"
-              />
-              <label
-                htmlFor="feedback"
-                className={`absolute left-4 transition-all duration-m-short ease-m-standard pointer-events-none ${
-                  focused || message
-                    ? "top-2 text-label-md text-primary"
-                    : "top-5 text-body-md text-surface-on-variant"
-                }`}
-              >
-                Your feedback
-              </label>
-            </div>
-
-            <p className="mt-3 text-label-md text-surface-on-variant">
-              Your feedback is completely anonymous. Please don&apos;t include
-              personal information.
-            </p>
-
-            <div className="mt-6">
-              <Button
-                type="submit"
-                variant="filled"
-                size="lg"
-                disabled={loading || !message.trim()}
-              >
-                {loading ? "Submitting..." : "Submit Feedback"}
-              </Button>
-            </div>
-          </form>
-        )}
+        <FeedbackForm />
       </div>
     </Section>
+  );
+}
+
+function GateCard({
+  icon,
+  title,
+  body,
+  ctaHref,
+  ctaLabel,
+}: {
+  icon: string;
+  title: string;
+  body: string;
+  ctaHref: string;
+  ctaLabel: string;
+}) {
+  return (
+    <div className="max-w-xl mx-auto rounded-m-xl bg-surface-container border border-outline-variant p-10 text-center shadow-elev-1">
+      <div className="text-display-md">{icon}</div>
+      <h3 className="mt-4 text-title-lg text-surface-on">{title}</h3>
+      <p className="mt-3 text-body-md text-surface-on-variant">{body}</p>
+      <div className="mt-8 inline-block">
+        <Button href={ctaHref} variant="filled" size="md">
+          {ctaLabel}
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -2,6 +2,10 @@ import Link from "next/link";
 import { Users, FileText, Calendar, Trophy, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
+// 👇 Replace with your actual Google Sheet ID (the long string in the sheet URL)
+const FEEDBACK_SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/1-UYnKn7X4u9Z5NdMUUwpZL87GL2-T8pG3JCFI8Qdlls/edit";
+
 export default async function AdminOverviewPage() {
   const supabase = await createClient();
 
@@ -77,6 +81,29 @@ export default async function AdminOverviewPage() {
           );
         })}
       </div>
+
+      {/* Feedback shortcut */}
+      <a
+        href={FEEDBACK_SHEET_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-m-xl bg-surface-container border border-outline-variant p-6 shadow-elev-1 hover:shadow-elev-3 transition-all duration-m-medium ease-m-standard"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-title-md text-surface-on">
+              📊 View all feedback
+            </h3>
+            <p className="mt-1 text-body-md text-surface-on-variant">
+              Opens the CADers Feedback Google Sheet in a new tab.
+            </p>
+          </div>
+          <ArrowRight
+            size={18}
+            className="shrink-0 text-surface-on-variant"
+          />
+        </div>
+      </a>
 
       <div className="rounded-m-xl bg-primary-container p-8 md:p-10">
         <h3 className="text-title-lg text-primary-on-container">
