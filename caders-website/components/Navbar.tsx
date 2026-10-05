@@ -44,10 +44,11 @@ export default function Navbar({ user }: { user: User | null }) {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-m-medium ease-m-standard ${elevated
+      className={`sticky top-0 z-50 transition-all duration-m-medium ease-m-standard ${
+        elevated
           ? "bg-surface/75 backdrop-blur-xl border-b border-outline-variant/50 shadow-elev-1"
           : "bg-surface/50 backdrop-blur-sm border-b border-transparent"
-        }`}
+      }`}
     >
       <nav className="container flex items-center justify-between h-16">
         {/* Logo + wordmark */}
@@ -70,10 +71,11 @@ export default function Navbar({ user }: { user: User | null }) {
               <li key={l.href}>
                 <Link
                   href={l.href}
-                  className={`relative px-4 py-2 rounded-full text-label-lg transition-all duration-m-short ease-m-standard ${active
+                  className={`relative px-4 py-2 rounded-full text-label-lg transition-all duration-m-short ease-m-standard ${
+                    active
                       ? "text-primary bg-primary/10"
                       : "text-surface-on-variant hover:text-primary hover:bg-primary/5"
-                    }`}
+                  }`}
                 >
                   {l.label}
                 </Link>
@@ -116,10 +118,11 @@ export default function Navbar({ user }: { user: User | null }) {
                   <Link
                     href={l.href}
                     onClick={() => setOpen(false)}
-                    className={`block px-4 py-3 rounded-full text-label-lg transition ${active
+                    className={`block px-4 py-3 rounded-full text-label-lg transition ${
+                      active
                         ? "bg-primary/10 text-primary"
                         : "text-surface-on-variant hover:bg-primary/5 hover:text-primary"
-                      }`}
+                    }`}
                   >
                     {l.label}
                   </Link>
