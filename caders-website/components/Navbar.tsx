@@ -44,17 +44,19 @@ export default function Navbar({ user }: { user: User | null }) {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-m-medium ease-m-standard ${
-        elevated
+      className={`sticky top-0 z-50 transition-all duration-m-medium ease-m-standard ${elevated
           ? "bg-surface/75 backdrop-blur-xl border-b border-outline-variant/50 shadow-elev-1"
           : "bg-surface/50 backdrop-blur-sm border-b border-transparent"
-      }`}
+        }`}
     >
       <nav className="container flex items-center justify-between h-16">
+        {/* Logo + wordmark */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-m-md bg-gradient-to-br from-primary to-secondary text-primary-on flex items-center justify-center font-bold shadow-elev-1 group-hover:shadow-elev-2 transition-shadow">
-            C
-          </div>
+          <img
+            src="/logo.png"
+            alt="CADers logo"
+            className="h-10 w-auto object-contain transition-transform duration-m-medium ease-m-standard group-hover:scale-105"
+          />
           <span className="text-title-lg text-primary font-semibold">
             CADers
           </span>
@@ -68,11 +70,10 @@ export default function Navbar({ user }: { user: User | null }) {
               <li key={l.href}>
                 <Link
                   href={l.href}
-                  className={`relative px-4 py-2 rounded-full text-label-lg transition-all duration-m-short ease-m-standard ${
-                    active
+                  className={`relative px-4 py-2 rounded-full text-label-lg transition-all duration-m-short ease-m-standard ${active
                       ? "text-primary bg-primary/10"
                       : "text-surface-on-variant hover:text-primary hover:bg-primary/5"
-                  }`}
+                    }`}
                 >
                   {l.label}
                 </Link>
@@ -115,11 +116,10 @@ export default function Navbar({ user }: { user: User | null }) {
                   <Link
                     href={l.href}
                     onClick={() => setOpen(false)}
-                    className={`block px-4 py-3 rounded-full text-label-lg transition ${
-                      active
+                    className={`block px-4 py-3 rounded-full text-label-lg transition ${active
                         ? "bg-primary/10 text-primary"
                         : "text-surface-on-variant hover:bg-primary/5 hover:text-primary"
-                    }`}
+                      }`}
                   >
                     {l.label}
                   </Link>

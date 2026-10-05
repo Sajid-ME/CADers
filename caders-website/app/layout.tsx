@@ -8,9 +8,23 @@ import { createClient } from "@/lib/supabase/server";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "CADers | KUET",
+  title: {
+    default: "CADers | KUET",
+    template: "%s | CADers",
+  },
   description:
     "Official website of CADers, KUET — promoting engineering design and producing quality designers.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
+  },
+  openGraph: {
+    title: "CADers | KUET",
+    description:
+      "Official website of CADers, KUET — promoting engineering design and producing quality designers.",
+    type: "website",
+  },
 };
 
 const themeInitScript = `
