@@ -15,16 +15,17 @@ export default function LoginPage() {
 
       <div className="container relative max-w-md">
         <div className="rounded-m-xl bg-surface-container border border-outline-variant p-8 md:p-10 shadow-elev-2">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-11 h-11 rounded-m-md bg-gradient-to-br from-primary to-secondary text-primary-on flex items-center justify-center font-bold shadow-elev-1">
-              C
-            </div>
-            <div>
-              <h1 className="text-title-lg text-surface-on">Sign In</h1>
-              <p className="text-body-md text-surface-on-variant">
-                CADers Student Portal
-              </p>
-            </div>
+          {/* Logo + heading */}
+          <div className="flex flex-col items-center text-center mb-8">
+            <img
+              src="/logo.jpg"
+              alt="CADers logo"
+              className="h-20 w-auto object-contain mb-5"
+            />
+            <h1 className="text-title-lg text-surface-on">Sign In</h1>
+            <p className="text-body-md text-surface-on-variant mt-1">
+              CADers Student Portal
+            </p>
           </div>
 
           <LoginForm />
