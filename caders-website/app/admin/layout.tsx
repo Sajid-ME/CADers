@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AdminTabs from "./AdminTabs";
-import ThemeToggle from "@/components/ThemeToggle";
-import UserMenu from "@/components/UserMenu";
 
 const nav = [
   { href: "/admin", label: "Overview" },
@@ -46,25 +44,8 @@ export default async function AdminLayout({
 
   return (
     <>
-      <div className="border-b border-outline-variant bg-surface-container">
-        <div className="container flex items-center justify-between py-6 gap-4 flex-wrap">
-          <div>
-            <h1 className="text-headline-md text-surface-on">Admin Panel</h1>
-            <p className="text-body-md text-surface-on-variant mt-1">
-              Signed in as {profile.full_name || profile.username}
-            </p>
-          </div>
-          
-          {/* Add UserMenu and ThemeToggle here instead of LogoutButton */}
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <UserMenu user={profile} />
-          </div>
-        </div>
-      </div>
-
+      {/* Only the tabs remain right below the Global Navbar */}
       <AdminTabs items={nav} />
-
       <div className="container py-10">{children}</div>
     </>
   );

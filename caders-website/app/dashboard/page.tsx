@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Section from "@/components/Section";
-import ThemeToggle from "@/components/ThemeToggle";
-import UserMenu from "@/components/UserMenu";
 import { FileText, ClipboardList, BookOpen, Download } from "lucide-react";
 
 export const metadata = {
@@ -39,7 +37,6 @@ export default async function DashboardPage() {
     redirect("/admin");
   }
 
-  // Enrollments (with course info)
   const { data: enrollments } = await supabase
     .from("enrollments")
     .select(
@@ -47,13 +44,11 @@ export default async function DashboardPage() {
     )
     .eq("student_id", user.id);
 
-  // Materials for enrolled courses (RLS filters them)
   const { data: materials } = await supabase
     .from("materials")
     .select("id, course_id, type, title, file_path, uploaded_at")
     .order("uploaded_at", { ascending: false });
 
-  // Generate signed URLs (1 hour)
   const materialsWithUrls: (MaterialRow & { url: string | null })[] = [];
   for (const m of (materials ?? []) as MaterialRow[]) {
     const { data: signed } = await supabase.storage
@@ -74,73 +69,66 @@ export default async function DashboardPage() {
     .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0));
 
   return (
-    <>
-      <div className="border-b border-outline-variant bg-surface-container">
-        <div className="container flex items-center justify-between py-6">
-          <div>
-            <h1 className="text-headline-md text-surface-on">
-              Welcome, {profile.full_name || profile.username}
-            </h1>
-            <p className="text-body-md text-surface-on-variant mt-1">
-              {profile.department || "—"}
-              {profile.roll_number ? ` • ${profile.roll_number}` : ""}
-            </p>
-          </div>
-          
-          {/* Add UserMenu and ThemeToggle here instead of LogoutButton */}
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <UserMenu user={profile} />
-          </div>
-        </div>
+    <Section>
+      {/* Welcome message moved into the page content */}
+      <div className="mb-10">
+        <h1 className="text-headline-md text-surface-on">
+          Welcome, {profile.full_name || profile.username}
+        </h1>
+        <p className="text-body-md text-surface-on-variant mt-1">
+          {profile.department || "—"}
+          {profile.roll_number ? ` • ${profile.roll_number}` : ""}
+        </p>
       </div>
 
-      <Section
-        title="Your Courses"
-        subtitle="Download slides, homework, and classwork for courses you're enrolled in."
-      >
-        {courses.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="space-y-10">
-            {courses.map((course: any) => {
-              const items = grouped.get(course.id) ?? [];
-              return (
-                <div key={course.id}>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-m-md bg-primary-container text-primary-on-container flex items-center justify-center">
-                      <BookOpen size={18} />
-                    </div>
-                    <div>
-                      <h2 className="text-title-lg text-surface-on">
-                        {course.name}
-                      </h2>
-                      {course.description && (
-                        <p className="text-body-md text-surface-on-variant">
-                          {course.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+      <div className="mb-12">
+        <h2 className="text-title-lg text-surface-on mb-2">Your Courses</h2>
+        <p className="text-body-md text-surface-on-variant">
+          Download slides, homework, and classwork for courses you&apos;re enrolled in.
+        </p>
+      </div>
 
-                  {items.length === 0 ? (
-                    <p className="text-body-md text-surface-on-variant ml-13">
-                      No materials uploaded yet.
-                    </p>
-                  ) : (
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {items.map((m) => (
-                        <MaterialCard key={m.id} material={m} />
-                      ))}
-                    </div>
-                  )}
+      {courses.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="space-y-10">
+          {courses.map((course: any) => {
+            const items = grouped.get(course.id) ?? [];
+            return (
+              <div key={course.id}>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-m-md bg-primary-container text-primary-on-container flex items-center justify-center">
+                    <BookOpen size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-title-lg text-surface-on">
+                      {course.name}
+                    </h2>
+                    {course.description && (
+                      <p className="text-body-md text-surface-on-variant">
+                        {course.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </Section>
-    </>
+
+                {items.length === 0 ? (
+                  <p className="text-body-md text-surface-on-variant ml-13">
+                    No materials uploaded yet.
+                  </p>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {items.map((m) => (
+                      <MaterialCard key={m.id} material={m} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Section>
   );
 }
 

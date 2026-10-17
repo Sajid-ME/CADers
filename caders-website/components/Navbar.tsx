@@ -20,18 +20,14 @@ const links = [
   { href: "/#achievements", label: "Achievements" },
   { href: "/#events", label: "Events" },
   { href: "/#voices", label: "Voices" },
-  { href: "/feedback", label: "Feedback" }, // Kept as page
-  { href: "/contact", label: "Contact" },   // Kept as page
+  { href: "/feedback", label: "Feedback" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar({ user }: { user: User | null }) {
   const [open, setOpen] = useState(false);
   const [elevated, setElevated] = useState(false);
   const pathname = usePathname();
-
-  // 🔥 HIDE THE ENTIRE NAVBAR ON ADMIN/DASHBOARD
-  const isDashboardOrAdmin = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
-  if (isDashboardOrAdmin) return null;
 
   useEffect(() => {
     const onScroll = () => setElevated(window.scrollY > 8);
@@ -66,10 +62,9 @@ export default function Navbar({ user }: { user: User | null }) {
 
         <ul className="hidden md:flex items-center gap-1">
           {links.map((l) => {
-            // Anchor links are always considered inactive unless they specifically match
             const isAnchor = l.href.startsWith("/#");
             const active = isAnchor
-              ? pathname === "/" && l.href === "/#home"
+              ? pathname === "/" && l.label === "Home" // Only highlight Home if on the home page
               : pathname.startsWith(l.href);
               
             return (
@@ -116,8 +111,9 @@ export default function Navbar({ user }: { user: User | null }) {
         <div className="md:hidden border-t border-outline-variant bg-surface/95 backdrop-blur-xl">
           <ul className="container py-4 flex flex-col gap-1">
             {links.map((l) => {
-              const active = l.href.startsWith("/#")
-                ? pathname === "/" && l.href === "/#home"
+              const isAnchor = l.href.startsWith("/#");
+              const active = isAnchor
+                ? pathname === "/" && l.label === "Home"
                 : pathname.startsWith(l.href);
                 
               return (
@@ -142,9 +138,7 @@ export default function Navbar({ user }: { user: User | null }) {
                 <>
                   <div className="flex items-center gap-3 px-2 py-2">
                     <span className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-on flex items-center justify-center font-semibold">
-                      {(user.full_name || user.username)
-                        .charAt(0)
-                        .toUpperCase()}
+                      {(user.full_name || user.username).charAt(0).toUpperCase()}
                     </span>
                     <div className="min-w-0">
                       <p className="text-title-md text-surface-on truncate">
