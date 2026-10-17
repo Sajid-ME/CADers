@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import LogoutButton from "@/components/LogoutButton";
 import AdminTabs from "./AdminTabs";
+import ThemeToggle from "@/components/ThemeToggle";
+import UserMenu from "@/components/UserMenu";
 
 const nav = [
   { href: "/admin", label: "Overview" },
@@ -53,7 +54,12 @@ export default async function AdminLayout({
               Signed in as {profile.full_name || profile.username}
             </p>
           </div>
-          <LogoutButton />
+          
+          {/* Add UserMenu and ThemeToggle here instead of LogoutButton */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <UserMenu user={profile} />
+          </div>
         </div>
       </div>
 

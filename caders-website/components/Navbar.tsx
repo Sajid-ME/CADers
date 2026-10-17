@@ -16,18 +16,22 @@ type User = {
 };
 
 const links = [
-  { href: "/", label: "Home" },
-  { href: "/achievements", label: "Achievements" },
-  { href: "/events", label: "Events" },
-  { href: "/voices", label: "Voices" },
-  { href: "/feedback", label: "Feedback" },
-  { href: "/contact", label: "Contact" },
+  { href: "/#home", label: "Home" },
+  { href: "/#achievements", label: "Achievements" },
+  { href: "/#events", label: "Events" },
+  { href: "/#voices", label: "Voices" },
+  { href: "/feedback", label: "Feedback" }, // Kept as page
+  { href: "/contact", label: "Contact" },   // Kept as page
 ];
 
 export default function Navbar({ user }: { user: User | null }) {
   const [open, setOpen] = useState(false);
   const [elevated, setElevated] = useState(false);
   const pathname = usePathname();
+
+  // 🔥 HIDE THE ENTIRE NAVBAR ON ADMIN/DASHBOARD
+  const isDashboardOrAdmin = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+  if (isDashboardOrAdmin) return null;
 
   useEffect(() => {
     const onScroll = () => setElevated(window.scrollY > 8);
@@ -40,8 +44,6 @@ export default function Navbar({ user }: { user: User | null }) {
     setOpen(false);
   }, [pathname]);
 
-  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
-
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-m-medium ease-m-standard ${
@@ -51,7 +53,6 @@ export default function Navbar({ user }: { user: User | null }) {
       }`}
     >
       <nav className="container flex items-center justify-between h-16">
-        {/* Logo + wordmark */}
         <Link href="/" className="flex items-center gap-3 group">
           <img
             src="/logo.png"
@@ -65,8 +66,12 @@ export default function Navbar({ user }: { user: User | null }) {
 
         <ul className="hidden md:flex items-center gap-1">
           {links.map((l) => {
-            const active =
-              l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
+            // Anchor links are always considered inactive unless they specifically match
+            const isAnchor = l.href.startsWith("/#");
+            const active = isAnchor
+              ? pathname === "/" && l.href === "/#home"
+              : pathname.startsWith(l.href);
+              
             return (
               <li key={l.href}>
                 <Link
@@ -111,8 +116,10 @@ export default function Navbar({ user }: { user: User | null }) {
         <div className="md:hidden border-t border-outline-variant bg-surface/95 backdrop-blur-xl">
           <ul className="container py-4 flex flex-col gap-1">
             {links.map((l) => {
-              const active =
-                l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
+              const active = l.href.startsWith("/#")
+                ? pathname === "/" && l.href === "/#home"
+                : pathname.startsWith(l.href);
+                
               return (
                 <li key={l.href}>
                   <Link
@@ -151,11 +158,11 @@ export default function Navbar({ user }: { user: User | null }) {
 
                   <div className="mt-3 flex flex-col gap-1">
                     <Link
-                      href={isAdmin ? "/admin" : "/dashboard"}
+                      href={user.role === "admin" || user.role === "super_admin" ? "/admin" : "/dashboard"}
                       onClick={() => setOpen(false)}
                       className="block px-4 py-3 rounded-full text-label-lg text-surface-on hover:bg-primary/10 hover:text-primary transition"
                     >
-                      {isAdmin ? "Admin Panel" : "My Dashboard"}
+                      {user.role === "admin" || user.role === "super_admin" ? "Admin Panel" : "My Dashboard"}
                     </Link>
                     <form action={logoutAction}>
                       <button

@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Section from "@/components/Section";
-import LogoutButton from "@/components/LogoutButton";
+import ThemeToggle from "@/components/ThemeToggle";
+import UserMenu from "@/components/UserMenu";
 import { FileText, ClipboardList, BookOpen, Download } from "lucide-react";
 
 export const metadata = {
@@ -85,7 +86,12 @@ export default async function DashboardPage() {
               {profile.roll_number ? ` • ${profile.roll_number}` : ""}
             </p>
           </div>
-          <LogoutButton />
+          
+          {/* Add UserMenu and ThemeToggle here instead of LogoutButton */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <UserMenu user={profile} />
+          </div>
         </div>
       </div>
 

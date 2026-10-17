@@ -31,9 +31,14 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero />
+      {/* 1. Add id="home" */}
+      <div id="home">
+        <Hero />
+      </div>
 
+      {/* 2. Add id="achievements" */}
       <Section
+        id="achievements"
         title="Our Achievements"
         subtitle="Milestones that define who we are."
       >
@@ -51,7 +56,9 @@ export default async function HomePage() {
         </div>
       </Section>
 
+      {/* 3. Add id="events" */}
       <Section
+        id="events"
         title="Recent & Upcoming Events"
         subtitle="Join our workshops, bootcamps, and design sprints."
         className="bg-surface-container"
@@ -74,7 +81,9 @@ export default async function HomePage() {
         </div>
       </Section>
 
+      {/* 4. Add id="voices" */}
       <Section
+        id="voices"
         title="Voices from Our Community"
         subtitle="What our moderator and faculty advisor say."
       >
@@ -89,7 +98,8 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      <Section>
+      {/* 5. Add id="feedback" */}
+      <Section id="feedback">
         <div className="rounded-m-xl bg-primary text-primary-on p-10 md:p-16 text-center shadow-elev-2">
           <h2 className="text-headline-md md:text-headline-lg">
             Have feedback? We&apos;re listening.
