@@ -499,3 +499,23 @@ export async function deleteVoiceAction(formData: FormData) {
   revalidatePath("/voices");
   revalidatePath("/");
 }
+// =====================================================================
+// Update Course
+// =====================================================================
+
+export async function updateCourseAction(formData: FormData) {
+  const guard = await assertAdmin();
+  if (!guard.ok) return;
+
+  const id = String(formData.get("course_id") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+
+  if (!id || !name) return;
+
+  const supabase = await createClient();
+  await supabase.from("courses").update({ name }).eq("id", id);
+
+  revalidatePath("/admin/enrollments");
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+}

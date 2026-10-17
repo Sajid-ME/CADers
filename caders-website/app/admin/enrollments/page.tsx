@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import CreateCourseForm from "./CreateCourseForm";
 import EnrollForm from "./EnrollForm";
 import EnrollmentRow from "./EnrollmentRow";
+import CourseRow from "./CourseRow"; // 👈 Import the new component
 
 export default async function AdminEnrollmentsPage() {
   const supabase = await createClient();
@@ -39,6 +40,39 @@ export default async function AdminEnrollmentsPage() {
         <EnrollForm students={students} courses={courses} />
       </div>
 
+      {/* NEW SECTION: MANAGE COURSES */}
+      <div className="rounded-m-xl bg-surface-container border border-outline-variant overflow-hidden shadow-elev-1">
+        <div className="px-6 py-4 border-b border-outline-variant">
+          <h3 className="text-title-md text-surface-on">
+            Manage Courses ({courses.length})
+          </h3>
+        </div>
+
+        {courses.length === 0 ? (
+          <div className="p-10 text-center text-body-md text-surface-on-variant">
+            No courses created yet.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-surface-container-high">
+                <tr className="text-label-md text-surface-on-variant uppercase">
+                  <th className="px-6 py-3">Course Name</th>
+                  <th className="px-6 py-3">Order</th>
+                  <th className="px-6 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant">
+                {courses.map((c) => (
+                  <CourseRow key={c.id} course={c} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* EXISTING SECTION: ALL ENROLLMENTS */}
       <div className="rounded-m-xl bg-surface-container border border-outline-variant overflow-hidden shadow-elev-1">
         <div className="px-6 py-4 border-b border-outline-variant">
           <h3 className="text-title-md text-surface-on">
