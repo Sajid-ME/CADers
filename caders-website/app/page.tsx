@@ -4,6 +4,7 @@ import AchievementSlideshow from "@/components/AchievementSlideshow";
 import VoicesSlideshow from "@/components/VoicesSlideshow";
 import EventCard from "@/components/EventCard";
 import Button from "@/components/Button";
+import ContactSection from "@/components/ContactSection";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
@@ -109,6 +110,16 @@ export default async function HomePage() {
             </Button>
           </div>
         </div>
+      </Section>
+
+      {/* NEW CONTACT SECTION */}
+      <Section
+        id="contact"
+        title="Contact Us"
+        subtitle="We'd love to hear from you. Reach out anytime."
+        className="bg-surface-container"
+      >
+        <ContactSection />
       </Section>
     </>
   );

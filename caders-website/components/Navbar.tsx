@@ -21,7 +21,7 @@ const links = [
   { href: "/#events", label: "Events" },
   { href: "/#voices", label: "Voices" },
   { href: "/feedback", label: "Feedback" },
-  { href: "/contact", label: "Contact" },
+  { href: "/#contact", label: "Contact" }, // 👈 Changed to anchor link
 ];
 
 export default function Navbar({ user }: { user: User | null }) {
@@ -40,6 +40,8 @@ export default function Navbar({ user }: { user: User | null }) {
     setOpen(false);
   }, [pathname]);
 
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-m-medium ease-m-standard ${
@@ -55,16 +57,23 @@ export default function Navbar({ user }: { user: User | null }) {
             alt="CADers logo"
             className="h-10 w-auto object-contain transition-transform duration-m-medium ease-m-standard group-hover:scale-105"
           />
-          <span className="text-title-lg text-primary font-semibold">
-            CADers
-          </span>
+          <div className="flex flex-col justify-center">
+            <span className="text-title-lg text-primary font-semibold leading-none">
+              CADers
+            </span>
+            {user && (
+              <span className="text-[11px] uppercase tracking-widest text-primary/70 font-bold mt-1">
+                {isAdmin ? "Admin Panel" : "Student Panel"}
+              </span>
+            )}
+          </div>
         </Link>
 
         <ul className="hidden md:flex items-center gap-1">
           {links.map((l) => {
             const isAnchor = l.href.startsWith("/#");
             const active = isAnchor
-              ? pathname === "/" && l.label === "Home" // Only highlight Home if on the home page
+              ? pathname === "/" && l.label === "Home"
               : pathname.startsWith(l.href);
               
             return (
@@ -152,11 +161,11 @@ export default function Navbar({ user }: { user: User | null }) {
 
                   <div className="mt-3 flex flex-col gap-1">
                     <Link
-                      href={user.role === "admin" || user.role === "super_admin" ? "/admin" : "/dashboard"}
+                      href={isAdmin ? "/admin" : "/dashboard"}
                       onClick={() => setOpen(false)}
                       className="block px-4 py-3 rounded-full text-label-lg text-surface-on hover:bg-primary/10 hover:text-primary transition"
                     >
-                      {user.role === "admin" || user.role === "super_admin" ? "Admin Panel" : "My Dashboard"}
+                      {isAdmin ? "Admin Panel" : "My Dashboard"}
                     </Link>
                     <form action={logoutAction}>
                       <button
