@@ -95,24 +95,8 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      <Section>
-        <div className="rounded-m-xl bg-primary text-primary-on p-10 md:p-16 text-center shadow-elev-2">
-          <h2 className="text-headline-md md:text-headline-lg">
-            Have feedback? We&apos;re listening.
-          </h2>
-          <p className="mt-4 text-body-lg text-primary-on/85 max-w-xl mx-auto">
-            Whether you&apos;re enrolled or just curious — share your thoughts on
-            our courses and syllabus. Anonymous and always welcome.
-          </p>
-          <div className="mt-8 inline-block">
-            <Button href="/feedback" variant="elevated" size="lg">
-              Give Feedback
-            </Button>
-          </div>
-        </div>
-      </Section>
+      {/* The big Feedback CTA has been removed to clean up the page */}
 
-      {/* NEW CONTACT SECTION */}
       <Section
         id="contact"
         title="Contact Us"
