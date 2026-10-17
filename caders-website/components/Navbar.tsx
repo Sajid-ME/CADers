@@ -63,7 +63,7 @@ export default function Navbar({ user }: { user: User | null }) {
             </span>
             {user && (
               <span className="text-[11px] uppercase tracking-widest text-primary/70 font-bold mt-1">
-                {isAdmin ? "Admin Panel" : "Student Panel"}
+                {isAdmin ? "Admin" : "Student"}
               </span>
             )}
           </div>
