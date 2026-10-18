@@ -38,15 +38,19 @@ export default function AchievementSlideshow({
           transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
           className="relative z-10 max-w-2xl"
         >
-          <p className="text-label-md text-primary-on-container/80 uppercase">
-            {current.date}
-          </p>
-          <h3 className="mt-3 text-headline-md text-primary-on-container">
-            {current.title}
-          </h3>
-          <p className="mt-4 text-body-lg text-primary-on-container/90">
-            {current.description}
-          </p>
+          {current.date && (
+  <p className="text-label-md text-primary-on-container/80 uppercase">
+    {current.date}
+  </p>
+)}
+<h3 className="mt-3 text-headline-md text-primary-on-container">
+  {current.title}
+</h3>
+{current.description && (
+  <p className="mt-4 text-body-lg text-primary-on-container/90">
+    {current.description}
+  </p>
+)}
         </motion.div>
       </AnimatePresence>
 

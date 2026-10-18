@@ -1,4 +1,5 @@
 "use server";
+import { randomInt } from "crypto";
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
@@ -16,37 +17,29 @@ async function assertAdmin() {
   const supabase = await createClient();
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
-
-  console.log("[assertAdmin] user:", user?.id ?? null, "error:", userError);
 
   if (!user) return { ok: false as const, error: "Not authenticated." };
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  console.log("[assertAdmin] profile:", profile, "error:", profileError);
-
-  if (
-    !profile ||
-    (profile.role !== "admin" && profile.role !== "super_admin")
-  ) {
+  if (!profile || (profile.role !== "admin" && profile.role !== "super_admin")) {
     return { ok: false as const, error: "Admin access required." };
   }
 
   return { ok: true as const, user };
 }
 
-function generatePassword(length = 10) {
+function generatePassword(length = 12) {
   const chars =
     "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
   let out = "";
   for (let i = 0; i < length; i++) {
-    out += chars[Math.floor(Math.random() * chars.length)];
+    out += chars[randomInt(chars.length)];
   }
   return out;
 }
@@ -518,4 +511,111 @@ export async function updateCourseAction(formData: FormData) {
   revalidatePath("/admin/enrollments");
   revalidatePath("/dashboard");
   revalidatePath("/");
+}
+// =====================================================================
+// Update Event / Achievement / Voice
+// =====================================================================
+
+export async function updateEventAction(
+  formData: FormData
+): Promise<ActionState> {
+  const guard = await assertAdmin();
+  if (!guard.ok) return { error: guard.error };
+
+  const id = String(formData.get("event_id") || "").trim();
+  const title = String(formData.get("title") || "").trim();
+  const date = String(formData.get("date") || "").trim();
+  const venue = String(formData.get("venue") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+
+  if (!id || !title || !date || !venue) {
+    return { error: "Title, date, and venue are required." };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return { error: "Date must be in YYYY-MM-DD format." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("events")
+    .update({ title, date, venue, description: description || null })
+    .eq("id", id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/events");
+  revalidatePath("/events");
+  revalidatePath("/");
+  return { error: null, success: "✅ Event updated." };
+}
+
+export async function updateAchievementAction(
+  formData: FormData
+): Promise<ActionState> {
+  const guard = await assertAdmin();
+  if (!guard.ok) return { error: guard.error };
+
+  const id = String(formData.get("achievement_id") || "").trim();
+  const title = String(formData.get("title") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+  const date = String(formData.get("date") || "").trim();
+
+  if (!id || !title) return { error: "Title is required." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("achievements")
+    .update({
+      title,
+      description: description || null,
+      date: date || null,
+    })
+    .eq("id", id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/achievements");
+  revalidatePath("/achievements");
+  revalidatePath("/");
+  return { error: null, success: "✅ Achievement updated." };
+}
+
+export async function updateVoiceAction(
+  formData: FormData
+): Promise<ActionState> {
+  const guard = await assertAdmin();
+  if (!guard.ok) return { error: guard.error };
+
+  const id = String(formData.get("voice_id") || "").trim();
+  const type = String(formData.get("type") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+  const designation = String(formData.get("designation") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+  const order_index = Number(formData.get("order_index") || 0) || 0;
+
+  if (!id || !name || !message) {
+    return { error: "Name and message are required." };
+  }
+  if (type !== "moderator" && type !== "faculty") {
+    return { error: "Please choose Moderator or Faculty." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("voices")
+    .update({
+      type,
+      name,
+      designation: designation || null,
+      message,
+      order_index,
+    })
+    .eq("id", id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/voices");
+  revalidatePath("/voices");
+  revalidatePath("/");
+  return { error: null, success: "✅ Voice updated." };
 }

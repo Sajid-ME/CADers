@@ -36,9 +36,11 @@ export default function VoicesSlideshow({ items }: { items: Voice[] }) {
           </p>
           <div className="mt-8">
             <p className="text-label-lg text-primary">{current.name}</p>
-            <p className="text-body-md text-surface-on-variant">
-              {current.designation}
-            </p>
+            {current.designation && (
+  <p className="text-body-md text-surface-on-variant">
+    {current.designation}
+  </p>
+)}
           </div>
         </motion.div>
       </AnimatePresence>

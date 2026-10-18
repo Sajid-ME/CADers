@@ -24,9 +24,11 @@ export default function EventCard({ event }: { event: EventItem }) {
           <span>{event.venue}</span>
         </div>
       </div>
-      <p className="mt-4 text-body-md text-surface-on-variant">
-        {event.description}
-      </p>
+      {event.description && (
+  <p className="mt-4 text-body-md text-surface-on-variant">
+    {event.description}
+  </p>
+)}
     </div>
   );
 }
