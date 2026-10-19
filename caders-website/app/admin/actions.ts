@@ -135,10 +135,16 @@ export async function deleteStudentAction(formData: FormData) {
   if (!guard.ok) return;
 
   const userId = String(formData.get("user_id") || "").trim();
-  if (!userId) return;
-  if (guard.user?.id === userId) return;
+  if (!userId || guard.user.id === userId) return;
 
   const admin = createAdminClient();
+  const { data: target } = await admin
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .single();
+  if (!target || target.role !== "student") return;
+
   await admin.auth.admin.deleteUser(userId);
 
   revalidatePath("/admin/students");
@@ -245,6 +251,7 @@ export async function deleteEnrollmentAction(formData: FormData) {
 // =====================================================================
 // Materials (file uploads)
 // =====================================================================
+const ALLOWED_EXTENSIONS = ["pdf", "ppt", "pptx", "doc", "docx", "zip"]
 
 export async function uploadMaterialAction(
   _prev: ActionState,
@@ -269,6 +276,11 @@ export async function uploadMaterialAction(
   }
   if (file.size > 20 * 1024 * 1024) {
     return { error: "File must be under 20 MB." };
+  }
+  // inside uploadMaterialAction, after the size check:
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+  return { error: "Unsupported file type. Use PDF, PPT(X), DOC(X), or ZIP." };
   }
 
   const admin = createAdminClient();

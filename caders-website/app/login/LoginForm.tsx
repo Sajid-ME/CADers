@@ -23,12 +23,14 @@ function SubmitButton() {
   );
 }
 
-export default function LoginForm() {
+export default function LoginForm({ next }: { next?: string }) {
   const [state, formAction] = useActionState(loginAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <form action={formAction} className="space-y-5">
+      <input type="hidden" name="next" value={next ?? ""} />
+
       {/* Username field */}
       <div className="relative">
         <input
@@ -76,7 +78,10 @@ export default function LoginForm() {
       </div>
 
       {state.error && (
-        <div className="rounded-m-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-body-md text-red-700 dark:text-red-300">
+        <div
+          role="alert"
+          className="rounded-m-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-body-md text-red-700 dark:text-red-300"
+        >
           {state.error}
         </div>
       )}

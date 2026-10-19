@@ -6,12 +6,18 @@ export const metadata = {
   description: "Sign in to access your CADers student portal.",
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+
   return (
     <div className="relative min-h-[80vh] flex items-center justify-center py-16 overflow-hidden">
       {/* Soft background glow */}
       <div className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full bg-primary/15 blur-[120px]" />
-      <div className="absolute -bottom-40 -left-32 w-[420px] h-[420px] rounded-full bg-secondary/15 blur-[120px]" />
+      <div className="absolute -bottom-40 -left-32 w-[420px] h-[420px] rounded-full bg-secondary/20 blur-[120px]" />
 
       <div className="container relative max-w-md">
         <div className="rounded-m-xl bg-surface-container border border-outline-variant p-8 md:p-10 shadow-elev-2">
@@ -28,7 +34,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <LoginForm />
+          <LoginForm next={next} />
 
           <p className="mt-8 text-center text-body-md text-surface-on-variant">
             Don&apos;t have an account?{" "}

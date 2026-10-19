@@ -11,38 +11,32 @@ export default function FeedbackForm() {
   const [focused, setFocused] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    if (!message.trim()) return;
+  e.preventDefault();
+  setError(null);
+  if (!message.trim()) return;
 
-    setLoading(true);
+  setLoading(true);
+  try {
+    const res = await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: message.trim() }),
+    });
 
-    const url = process.env.NEXT_PUBLIC_FEEDBACK_WEBHOOK_URL;
-    if (!url) {
-      setError("Feedback is temporarily unavailable. Please try again later.");
-      setLoading(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      setError(data?.error ?? "Something went wrong. Please try again.");
       return;
     }
 
-    try {
-      await fetch(url, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          message: message.trim(),
-          source: "web",
-        }),
-      });
-
-      setSubmitted(true);
-      setMessage("");
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    setSubmitted(true);
+    setMessage("");
+  } catch {
+    setError("Network error. Please try again.");
+  } finally {
+    setLoading(false);
   }
+}
 
   if (submitted) {
     return (

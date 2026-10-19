@@ -19,12 +19,20 @@ function candidates(identifier: string): string[] {
   return [`${trimmed}${USERNAME_DOMAIN}`, `${trimmed}@caders.local`];
 }
 
+/** Only allow same-site relative paths (prevents open redirects). */
+function safeNext(raw: string): string | null {
+  return raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/\\")
+    ? raw
+    : null;
+}
+
 export async function loginAction(
   _prev: LoginState,
   formData: FormData
 ): Promise<LoginState> {
   const identifier = String(formData.get("username") || "").trim();
   const password = String(formData.get("password") || "");
+  const next = safeNext(String(formData.get("next") || ""));
 
   if (!identifier || !password) {
     return { error: "Please enter both username and password." };
@@ -47,7 +55,7 @@ export async function loginAction(
     }
 
     lastError = error?.message ?? null;
-    console.error("[LOGIN attempt failed]", { email, error: lastError });
+    console.error("[LOGIN attempt failed]", lastError);
   }
 
   if (!signedInUser) {
@@ -76,10 +84,10 @@ export async function loginAction(
   }
 
   if (profile?.role === "admin" || profile?.role === "super_admin") {
-    redirect("/admin");
+    redirect(next ?? "/admin");
   }
 
-  redirect("/dashboard");
+  redirect(next && !next.startsWith("/admin") ? next : "/dashboard");
 }
 
 export async function logoutAction() {

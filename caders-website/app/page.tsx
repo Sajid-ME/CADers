@@ -40,6 +40,7 @@ export default async function HomePage() {
         id="achievements"
         title="Our Achievements"
         subtitle="Milestones that define who we are."
+        tone="fresh"
       >
         {achievements.length > 0 ? (
           <AchievementSlideshow items={achievements} />
@@ -59,7 +60,7 @@ export default async function HomePage() {
         id="events"
         title="Recent & Upcoming Events"
         subtitle="Join our workshops, bootcamps, and design sprints."
-        className="bg-surface-container"
+        tone="deep"
       >
         {events.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-3">
@@ -83,6 +84,7 @@ export default async function HomePage() {
         id="voices"
         title="Voices from Our Community"
         subtitle="What our moderator and faculty advisor say."
+        tone="fresh"
       >
         <div className="max-w-3xl mx-auto">
           {voices.length > 0 ? (
@@ -95,13 +97,11 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      {/* The big Feedback CTA has been removed to clean up the page */}
-
       <Section
         id="contact"
         title="Contact Us"
         subtitle="We'd love to hear from you. Reach out anytime."
-        className="bg-surface-container"
+        tone="deep"
       >
         <ContactSection />
       </Section>

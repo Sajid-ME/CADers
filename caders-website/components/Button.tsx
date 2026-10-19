@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { MouseEvent, ReactNode, useState } from "react";
 
-type Variant = "filled" | "outlined" | "text" | "elevated" | "tonal";
+type Variant = "filled" | "outlined" | "text" | "elevated" | "tonal" | "accent";
 type Size = "sm" | "md" | "lg";
 
 type Props = {
@@ -25,6 +25,8 @@ type RippleItem = { id: number; x: number; y: number; size: number };
 const variants: Record<Variant, string> = {
   filled:
     "bg-primary text-primary-on hover:bg-primary-dark hover:shadow-elev-2 active:shadow-elev-1",
+  accent:
+    "bg-tertiary text-tertiary-on hover:brightness-95 hover:shadow-elev-2 active:shadow-elev-1",
   tonal:
     "bg-primary-container text-primary-on-container hover:brightness-95 hover:shadow-elev-1",
   outlined:

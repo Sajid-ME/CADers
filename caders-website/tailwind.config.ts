@@ -25,6 +25,13 @@ const config: Config = {
           "on-container":
             "rgb(var(--color-secondary-on-container) / <alpha-value>)",
         },
+        tertiary: {
+          DEFAULT: "rgb(var(--color-tertiary) / <alpha-value>)",
+          on: "rgb(var(--color-tertiary-on) / <alpha-value>)",
+          container: "rgb(var(--color-tertiary-container) / <alpha-value>)",
+          "on-container":
+            "rgb(var(--color-tertiary-on-container) / <alpha-value>)",
+        },
         surface: {
           DEFAULT: "rgb(var(--color-surface) / <alpha-value>)",
           variant: "rgb(var(--color-surface-variant) / <alpha-value>)",
@@ -79,6 +86,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
       },
     },
   },
