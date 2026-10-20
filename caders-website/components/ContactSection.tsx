@@ -33,7 +33,7 @@ export default function ContactSection() {
           {
             icon: <Phone className="text-primary mt-1" />,
             title: "Phone",
-            body: <>+880 1XXX-XXXXXX</>,
+            body: <>+880 1521-719758</>,
           },
         ].map((item) => (
           <div

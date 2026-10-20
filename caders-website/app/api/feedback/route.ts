@@ -1,14 +1,60 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+// ---------------------------------------------------------------------------
+// Simple in-memory rate limiter (per IP, resets on cold start / redeployment)
+// For production, replace with Redis-backed rate limiting (e.g. Upstash)
+// ---------------------------------------------------------------------------
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute window
+const RATE_LIMIT_MAX_REQUESTS = 3;   // max 3 feedback submissions per minute
+
+function getClientIp(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown"
+  );
+}
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || entry.resetAt < now) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true; // allowed
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false; // blocked
+  }
+
+  entry.count++;
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/feedback
+// ---------------------------------------------------------------------------
 export async function POST(request: Request) {
-  // Basic CSRF defence: same-origin requests only
+  // 1. Rate limit
+  const ip = getClientIp(request);
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a moment before submitting again." },
+      { status: 429 }
+    );
+  }
+
+  // 2. Basic CSRF defence: same-origin requests only
   const origin = request.headers.get("origin");
   const host = request.headers.get("host");
   if (origin && host && new URL(origin).host !== host) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
 
+  // 3. Authentication: must be logged in
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,6 +63,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Please sign in." }, { status: 401 });
   }
 
+  // 4. Authorisation: must be enrolled student or admin
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -37,6 +84,7 @@ export async function POST(request: Request) {
     }
   }
 
+  // 5. Parse + validate body
   let body: { message?: unknown };
   try {
     body = await request.json();
@@ -44,7 +92,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const message = typeof body.message === "string" ? body.message.trim() : "";
+  const rawMessage = typeof body.message === "string" ? body.message : "";
+  // Strip potential HTML/script tags before length check
+  const message = rawMessage.replace(/<[^>]*>/g, "").trim();
   if (!message || message.length > 5000) {
     return NextResponse.json(
       { error: "Feedback must be between 1 and 5000 characters." },
@@ -52,6 +102,7 @@ export async function POST(request: Request) {
     );
   }
 
+  // 6. Forward to webhook (identity is never forwarded — stays anonymous)
   const url = process.env.FEEDBACK_WEBHOOK_URL;
   if (!url) {
     return NextResponse.json(
@@ -61,7 +112,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Only the message is forwarded, never the user's identity (stays anonymous)
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },

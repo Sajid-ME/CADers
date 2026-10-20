@@ -35,6 +35,9 @@ export const metadata: Metadata = {
       "Official website of CADers, KUET — promoting engineering design and producing quality designers.",
     type: "website",
   },
+  other: {
+    "darkreader-lock": "",
+  },
 };
 
 const themeInitScript = `
@@ -79,6 +82,8 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <meta name="darkreader-lock" />
+        <meta name="color-scheme" content="light dark" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body

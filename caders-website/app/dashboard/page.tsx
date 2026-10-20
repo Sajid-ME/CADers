@@ -1,7 +1,14 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Section from "@/components/Section";
-import { FileText, ClipboardList, BookOpen, Download } from "lucide-react";
+import {
+  FileText,
+  ClipboardList,
+  BookOpen,
+  Download,
+  GraduationCap,
+  Layers,
+} from "lucide-react";
 
 export const metadata = {
   title: "Dashboard | CADers",
@@ -68,24 +75,64 @@ export default async function DashboardPage() {
     .filter(Boolean)
     .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0));
 
+  const displayName = profile.full_name || profile.username;
+  const initial = displayName.charAt(0).toUpperCase();
+
+  // Compute quick stats
+  const totalMaterials = materialsWithUrls.length;
+  const totalCourses = courses.length;
+
   return (
     <Section>
-      {/* Welcome message moved into the page content */}
-      <div className="mb-10">
-        <h1 className="text-headline-md text-surface-on">
-          Welcome, {profile.full_name || profile.username}
-        </h1>
-        <p className="text-body-md text-surface-on-variant mt-1">
-          {profile.department || "—"}
-          {profile.roll_number ? ` • ${profile.roll_number}` : ""}
-        </p>
+      {/* ── Welcome card ── */}
+      <div className="mb-10 rounded-m-xl bg-gradient-to-br from-primary-container via-surface-container to-surface-container border border-outline-variant p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 shadow-elev-1">
+        {/* Avatar */}
+        <div
+          className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-on flex items-center justify-center text-headline-md font-bold shrink-0 shadow-elev-2"
+          aria-hidden
+        >
+          {initial}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <p className="text-label-md text-primary uppercase tracking-widest">
+            Student Portal
+          </p>
+          <h1 className="text-headline-md text-surface-on truncate">
+            Welcome back, {displayName.split(" ")[0]}!
+          </h1>
+          <p className="text-body-md text-surface-on-variant mt-1">
+            {profile.department || "—"}
+            {profile.roll_number ? ` • Roll: ${profile.roll_number}` : ""}
+          </p>
+        </div>
+
+        {/* Quick stats */}
+        <div className="flex gap-6 shrink-0">
+          <div className="text-center">
+            <p className="text-headline-md text-primary font-bold">{totalCourses}</p>
+            <p className="text-label-md text-surface-on-variant">Courses</p>
+          </div>
+          <div className="w-px bg-outline-variant" />
+          <div className="text-center">
+            <p className="text-headline-md text-primary font-bold">{totalMaterials}</p>
+            <p className="text-label-md text-surface-on-variant">Materials</p>
+          </div>
+        </div>
       </div>
 
-      <div className="mb-12">
-        <h2 className="text-title-lg text-surface-on mb-2">Your Courses</h2>
-        <p className="text-body-md text-surface-on-variant">
-          Download slides, homework, and classwork for courses you&apos;re enrolled in.
-        </p>
+      {/* ── Section heading ── */}
+      <div className="mb-8 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-m-md bg-primary-container text-primary-on-container flex items-center justify-center">
+          <Layers size={18} />
+        </div>
+        <div>
+          <h2 className="text-title-lg text-surface-on">Your Courses</h2>
+          <p className="text-body-md text-surface-on-variant">
+            Download slides, homework, and classwork.
+          </p>
+        </div>
       </div>
 
       {courses.length === 0 ? (
@@ -101,9 +148,9 @@ export default async function DashboardPage() {
                     <BookOpen size={18} />
                   </div>
                   <div>
-                    <h2 className="text-title-lg text-surface-on">
+                    <h3 className="text-title-lg text-surface-on">
                       {course.name}
-                    </h2>
+                    </h3>
                     {course.description && (
                       <p className="text-body-md text-surface-on-variant">
                         {course.description}
@@ -134,13 +181,16 @@ export default async function DashboardPage() {
 
 function EmptyState() {
   return (
-    <div className="rounded-m-xl bg-surface-container border border-outline-variant p-10 text-center">
-      <BookOpen className="mx-auto text-primary" size={40} />
+    <div className="rounded-m-xl bg-surface-container border border-outline-variant p-12 text-center">
+      <div className="mx-auto w-20 h-20 rounded-full bg-primary-container flex items-center justify-center mb-4">
+        <GraduationCap className="text-primary-on-container" size={36} />
+      </div>
       <h3 className="mt-4 text-title-lg text-surface-on">
-        You&apos;re not enrolled in any course yet
+        No courses yet
       </h3>
-      <p className="mt-2 text-body-md text-surface-on-variant">
-        Please contact a CADers admin to be enrolled.
+      <p className="mt-2 text-body-md text-surface-on-variant max-w-xs mx-auto">
+        You&apos;re not enrolled in any course yet. Please contact a CADers admin
+        to be enrolled.
       </p>
     </div>
   );
@@ -165,18 +215,33 @@ function MaterialCard({
       ? "Homework"
       : "Classwork";
 
+  const typeColor =
+    material.type === "slide"
+      ? "text-primary bg-primary-container"
+      : material.type === "hw"
+      ? "text-tertiary-on bg-tertiary-container"
+      : "text-secondary-on bg-secondary-container";
+
   return (
-    <div className="rounded-m-lg bg-surface-container border border-outline-variant p-5 shadow-elev-1 hover:shadow-elev-3 transition-all duration-m-medium ease-m-standard flex items-start gap-4">
-      <div className="w-10 h-10 rounded-m-md bg-primary-container text-primary-on-container flex items-center justify-center shrink-0">
+    <div className="rounded-m-lg bg-surface-container border border-outline-variant p-5 shadow-elev-1 hover:shadow-elev-3 transition-all duration-m-medium ease-m-standard flex items-start gap-4 group">
+      <div
+        className={`w-10 h-10 rounded-m-md flex items-center justify-center shrink-0 ${typeColor}`}
+      >
         <Icon size={18} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-label-md text-primary uppercase">{typeLabel}</p>
-        <h3 className="text-title-md text-surface-on mt-1 truncate">
+        <p className="text-label-md uppercase tracking-wider text-surface-on-variant">
+          {typeLabel}
+        </p>
+        <h4 className="text-title-md text-surface-on mt-1 truncate">
           {material.title}
-        </h3>
+        </h4>
         <p className="text-label-md text-surface-on-variant mt-1">
-          {new Date(material.uploaded_at).toLocaleDateString("en-GB")}
+          {new Date(material.uploaded_at).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
         </p>
       </div>
       {material.url ? (
@@ -186,11 +251,12 @@ function MaterialCard({
           rel="noopener noreferrer"
           className="shrink-0 w-10 h-10 rounded-full inline-flex items-center justify-center text-primary hover:bg-primary/10 transition"
           aria-label={`Download ${material.title}`}
+          title={`Download ${material.title}`}
         >
           <Download size={18} />
         </a>
       ) : (
-        <span className="shrink-0 text-label-md text-surface-on-variant">
+        <span className="shrink-0 text-label-md text-surface-on-variant px-2">
           N/A
         </span>
       )}
