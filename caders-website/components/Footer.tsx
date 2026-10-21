@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ExternalLink, MapPin } from "lucide-react";
 import { FacebookIcon, LinkedInIcon, YouTubeIcon, MailIcon } from "./SocialIcons";
 
 const quickLinks = [
@@ -38,6 +41,13 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide the footer completely inside student and admin panels
+  if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) {
+    return null;
+  }
+
   return (
     <footer className="bg-surface-container-high mt-20 border-t border-outline-variant">
       <div className="container py-14 grid gap-10 md:grid-cols-3">
@@ -108,16 +118,28 @@ export default function Footer() {
           <h4 className="text-title-md text-surface-on mb-4">Contact</h4>
           <address className="not-italic text-body-md text-surface-on-variant space-y-3">
             <p>
+              Department of Mechanical Engineering
+              <br />
               Khulna University of Engineering &amp; Technology
               <br />
               Khulna 9203, Bangladesh
             </p>
           </address>
           <a
+            href="https://maps.app.goo.gl/P6PfRWXY4EfZKCLf7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-1.5 text-label-md text-surface-on-variant hover:text-primary transition-colors"
+          >
+            <MapPin size={13} />
+            View on Google Maps
+          </a>
+          <br />
+          <a
             href="https://kuet.ac.bd"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex items-center gap-1.5 text-label-md text-surface-on-variant hover:text-primary transition-colors"
+            className="mt-2 inline-flex items-center gap-1.5 text-label-md text-surface-on-variant hover:text-primary transition-colors"
           >
             <ExternalLink size={13} />
             kuet.ac.bd

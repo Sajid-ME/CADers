@@ -1,7 +1,9 @@
-import { Mail, MapPin, Phone, Share2 } from "lucide-react";
+import { Mail, MapPin, Phone, Share2, ExternalLink } from "lucide-react";
 import { FacebookIcon, LinkedInIcon, YouTubeIcon } from "./SocialIcons";
 
-const MAP_QUERY = "Khulna University of Engineering and Technology";
+const MAP_LINK = "https://maps.app.goo.gl/P6PfRWXY4EfZKCLf7";
+const EMBED_MAP_SRC =
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1838.25!2d89.5017612!3d22.9004184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ff9bd9e91f1eed%3A0xd4854c7541cf5ee!2sDepartment%20of%20Mechanical%20Engineering!5e0!3m2!1sen!2sbd!4v1700000000000";
 
 const socialChannels = [
   {
@@ -31,10 +33,12 @@ export default function ContactSection() {
         {[
           {
             icon: <MapPin className="text-primary mt-1" />,
-            title: "Address",
+            title: "Venue & Address",
             body: (
               <>
-                CADers, Khulna University of Engineering &amp; Technology,
+                Building of Department of Mechanical Engineering,
+                <br />
+                Khulna University of Engineering &amp; Technology (KUET),
                 <br />
                 Khulna 9203, Bangladesh
               </>
@@ -102,23 +106,27 @@ export default function ContactSection() {
         </div>
       </div>
 
-      <a
-        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          MAP_QUERY
-        )}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block rounded-m-lg overflow-hidden border border-outline-variant shadow-elev-2 hover:shadow-elev-4 transition-all duration-m-medium ease-m-standard"
-      >
+      {/* Interactive Google Map Preview Container */}
+      <div className="relative rounded-m-lg overflow-hidden border border-outline-variant shadow-elev-2 hover:shadow-elev-3 transition-all duration-m-medium ease-m-standard min-h-[380px] flex flex-col bg-surface-container">
         <iframe
-          title="CADers location"
-          src={`https://www.google.com/maps?q=${encodeURIComponent(
-            MAP_QUERY
-          )}&output=embed`}
-          className="w-full h-80 md:h-full pointer-events-none"
+          title="CADers Venue - Department of Mechanical Engineering, KUET"
+          src={EMBED_MAP_SRC}
+          className="w-full flex-1 min-h-[380px] border-0"
           loading="lazy"
+          allowFullScreen
+          referrerPolicy="no-referrer-when-downgrade"
         />
-      </a>
+        <a
+          href={MAP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute bottom-3 right-3 bg-surface/95 dark:bg-surface-container-high/95 backdrop-blur-md px-4 py-2 rounded-full text-label-md text-surface-on shadow-elev-2 border border-outline hover:border-primary hover:text-primary transition-all flex items-center gap-2 group"
+        >
+          <MapPin size={16} className="text-primary group-hover:scale-110 transition-transform" />
+          <span className="font-medium">Open in Google Maps</span>
+          <ExternalLink size={13} className="text-surface-on-variant group-hover:text-primary" />
+        </a>
+      </div>
     </div>
   );
 }
