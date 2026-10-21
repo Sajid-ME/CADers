@@ -9,6 +9,19 @@ export type LoginState = {
   error: string | null;
 };
 
+// In-memory rate limiting to protect against credential stuffing & brute force
+const loginAttemptsMap = new Map<string, { attempts: number; lockUntil: number }>();
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_MS = 5 * 60 * 1000; // 5-minute cooldown
+
+function getClientKey(headerList: Headers, identifier: string): string {
+  const ip =
+    headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    headerList.get("x-real-ip") ??
+    "ip";
+  return `${ip}::${identifier.toLowerCase()}`;
+}
+
 /**
  * Accepts a bare username, or a full email. Tries the new @caders.kuet
  * domain first, then falls back to @caders.local for legacy accounts.
@@ -38,6 +51,19 @@ export async function loginAction(
     return { error: "Please enter both username and password." };
   }
 
+  const h = await headers();
+  const clientKey = getClientKey(h, identifier);
+  const now = Date.now();
+  const attemptRecord = loginAttemptsMap.get(clientKey);
+
+  // Check if locked out
+  if (attemptRecord && attemptRecord.lockUntil > now) {
+    const minutesLeft = Math.ceil((attemptRecord.lockUntil - now) / 60000);
+    return {
+      error: `Too many failed login attempts. Please wait ${minutesLeft} minute(s) before trying again.`,
+    };
+  }
+
   const supabase = await createClient();
 
   let signedInUser: { id: string } | null = null;
@@ -59,6 +85,23 @@ export async function loginAction(
   }
 
   if (!signedInUser) {
+    // Record failed attempt
+    const currentAttempts = (attemptRecord?.attempts ?? 0) + 1;
+    if (currentAttempts >= MAX_LOGIN_ATTEMPTS) {
+      loginAttemptsMap.set(clientKey, {
+        attempts: currentAttempts,
+        lockUntil: now + LOGIN_LOCKOUT_MS,
+      });
+      return {
+        error: "Too many failed attempts. Account temporarily locked for 5 minutes.",
+      };
+    } else {
+      loginAttemptsMap.set(clientKey, {
+        attempts: currentAttempts,
+        lockUntil: 0,
+      });
+    }
+
     return {
       error:
         lastError && !lastError.toLowerCase().includes("invalid")
@@ -67,6 +110,9 @@ export async function loginAction(
     };
   }
 
+  // Reset failed attempts on success
+  loginAttemptsMap.delete(clientKey);
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -74,7 +120,6 @@ export async function loginAction(
     .single();
 
   try {
-    const h = await headers();
     await supabase.from("login_logs").insert({
       user_id: signedInUser.id,
       user_agent: h.get("user-agent") ?? null,

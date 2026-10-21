@@ -56,12 +56,32 @@ export default async function DashboardPage() {
     .select("id, course_id, type, title, file_path, uploaded_at")
     .order("uploaded_at", { ascending: false });
 
-  const materialsWithUrls: (MaterialRow & { url: string | null })[] = [];
-  for (const m of (materials ?? []) as MaterialRow[]) {
-    const { data: signed } = await supabase.storage
-      .from("materials")
-      .createSignedUrl(m.file_path, 3600);
-    materialsWithUrls.push({ ...m, url: signed?.signedUrl ?? null });
+  const rawMaterials = (materials ?? []) as MaterialRow[];
+  let materialsWithUrls: (MaterialRow & { url: string | null })[] = [];
+
+  if (rawMaterials.length > 0) {
+    try {
+      const filePaths = rawMaterials.map((m) => m.file_path);
+      const { data: signedData } = await supabase.storage
+        .from("materials")
+        .createSignedUrls(filePaths, 3600);
+
+      const signedUrlMap = new Map<string, string | null>();
+      if (signedData) {
+        for (const item of signedData) {
+          if (item?.path && item?.signedUrl) {
+            signedUrlMap.set(item.path, item.signedUrl);
+          }
+        }
+      }
+
+      materialsWithUrls = rawMaterials.map((m) => ({
+        ...m,
+        url: signedUrlMap.get(m.file_path) ?? null,
+      }));
+    } catch {
+      materialsWithUrls = rawMaterials.map((m) => ({ ...m, url: null }));
+    }
   }
 
   const grouped = new Map<string, typeof materialsWithUrls>();
