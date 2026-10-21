@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ExternalLink, Mail, MapPin } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { FacebookIcon, LinkedInIcon, YouTubeIcon, MailIcon } from "./SocialIcons";
 
 const quickLinks = [
   { href: "/achievements", label: "Achievements" },
@@ -10,9 +11,30 @@ const quickLinks = [
 ];
 
 const socialLinks = [
-  { href: "https://facebook.com", label: "Facebook" },  // Update to actual page
-  { href: "https://github.com", label: "GitHub" },       // Update to actual org
-  { href: "https://linkedin.com", label: "LinkedIn" },   // Update to actual page
+  {
+    href: "https://www.facebook.com/caders.kuet",
+    label: "Facebook",
+    icon: FacebookIcon,
+    hoverColor: "hover:text-[#1877F2] hover:border-[#1877F2]/40 hover:bg-[#1877F2]/10",
+  },
+  {
+    href: "https://www.linkedin.com/company/caders/",
+    label: "LinkedIn",
+    icon: LinkedInIcon,
+    hoverColor: "hover:text-[#0A66C2] hover:border-[#0A66C2]/40 hover:bg-[#0A66C2]/10",
+  },
+  {
+    href: "https://www.youtube.com/@CADersKUET",
+    label: "YouTube",
+    icon: YouTubeIcon,
+    hoverColor: "hover:text-[#FF0000] hover:border-[#FF0000]/40 hover:bg-[#FF0000]/10",
+  },
+  {
+    href: "mailto:caders.kuet@gmail.com",
+    label: "Email",
+    icon: MailIcon,
+    hoverColor: "hover:text-primary hover:border-primary/40 hover:bg-primary/10",
+  },
 ];
 
 export default function Footer() {
@@ -36,20 +58,31 @@ export default function Footer() {
             Official engineering design club of KUET — promoting CAD skills and
             producing quality designers.
           </p>
-          {/* Social links */}
-          <div className="mt-5 flex flex-wrap gap-2">
-            {socialLinks.map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`CADers on ${s.label}`}
-                className="px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant text-label-md text-surface-on-variant hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all duration-m-short ease-m-standard"
-              >
-                {s.label}
-              </a>
-            ))}
+
+          {/* Social links with logos */}
+          <div className="mt-6">
+            <p className="text-label-md text-surface-on-variant mb-2.5 font-medium">
+              Connect with us
+            </p>
+            <div className="flex items-center gap-2.5">
+              {socialLinks.map((s) => {
+                const Icon = s.icon;
+                const isMail = s.href.startsWith("mailto:");
+                return (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target={isMail ? undefined : "_blank"}
+                    rel={isMail ? undefined : "noopener noreferrer"}
+                    aria-label={`CADers on ${s.label}`}
+                    title={s.label}
+                    className={`w-10 h-10 rounded-full bg-surface-container border border-outline-variant flex items-center justify-center text-surface-on-variant transition-all duration-m-short ease-m-standard shadow-sm hover:scale-105 ${s.hoverColor}`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
         </div>
 
