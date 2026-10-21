@@ -25,9 +25,9 @@ export const metadata: Metadata = {
   description:
     "Official website of CADers, KUET — promoting engineering design and producing quality designers.",
   icons: {
-    icon: "/icon.png",
-    shortcut: "/favicon.ico",
-    apple: "/icon.png",
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
   openGraph: {
     title: "CADers | KUET",

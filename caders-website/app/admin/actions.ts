@@ -191,11 +191,27 @@ export async function deleteCourseAction(formData: FormData) {
   const id = String(formData.get("course_id") || "").trim();
   if (!id) return;
 
-  const supabase = await createClient();
-  await supabase.from("courses").delete().eq("id", id);
+  const admin = createAdminClient();
+
+  const { data: materials } = await admin
+    .from("materials")
+    .select("file_path")
+    .eq("course_id", id);
+
+  const paths = (materials ?? [])
+    .map((m) => m.file_path)
+    .filter((path): path is string => Boolean(path));
+
+  if (paths.length > 0) {
+    await admin.storage.from("materials").remove(paths);
+  }
+
+  await admin.from("courses").delete().eq("id", id);
 
   revalidatePath("/admin/enrollments");
+  revalidatePath("/admin/materials");
   revalidatePath("/admin");
+  revalidatePath("/dashboard");
 }
 
 // =====================================================================
@@ -230,6 +246,7 @@ export async function enrollStudentAction(
 
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin");
+  revalidatePath("/dashboard");
 
   return { error: null, success: "✅ Student enrolled." };
 }
@@ -246,6 +263,7 @@ export async function deleteEnrollmentAction(formData: FormData) {
 
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin");
+  revalidatePath("/dashboard");
 }
 
 // =====================================================================

@@ -18,8 +18,7 @@ export default async function HomePage() {
     supabase
       .from("events")
       .select("id, title, date, venue, description")
-      .order("date", { ascending: false })
-      .limit(3),
+      .order("date", { ascending: true }),
     supabase
       .from("voices")
       .select("id, type, name, designation, message")
@@ -27,8 +26,15 @@ export default async function HomePage() {
   ]);
 
   const achievements = achRes.data ?? [];
-  const events = evtRes.data ?? [];
   const voices = voiceRes.data ?? [];
+
+  const today = new Date().toISOString().slice(0, 10);
+  const allEvents = evtRes.data ?? [];
+  const upcoming = allEvents.filter((e) => e.date >= today);
+  const recentPast = allEvents
+    .filter((e) => e.date < today)
+    .reverse();
+  const events = [...upcoming, ...recentPast].slice(0, 3);
 
   return (
     <>
