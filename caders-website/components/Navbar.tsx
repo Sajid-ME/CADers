@@ -15,13 +15,35 @@ type User = {
   role: string;
 };
 
-const links = [
+type NavItem = {
+  href: string;
+  label: string;
+  exact?: boolean;
+};
+
+const publicLinks: NavItem[] = [
   { href: "/#home", label: "Home" },
   { href: "/#achievements", label: "Achievements" },
   { href: "/#events", label: "Events" },
   { href: "/#voices", label: "Voices" },
   { href: "/feedback", label: "Feedback" },
-  { href: "/#contact", label: "Contact" }, // 👈 Changed to anchor link
+  { href: "/#contact", label: "Contact" },
+];
+
+const adminLinks: NavItem[] = [
+  { href: "/admin", label: "Overview", exact: true },
+  { href: "/admin/students", label: "Students" },
+  { href: "/admin/enrollments", label: "Enrollments" },
+  { href: "/admin/materials", label: "Materials" },
+  { href: "/admin/events", label: "Events" },
+  { href: "/admin/achievements", label: "Achievements" },
+  { href: "/admin/voices", label: "Voices" },
+  { href: "/admin/logs", label: "Login Logs" },
+];
+
+const studentLinks: NavItem[] = [
+  { href: "/dashboard", label: "My Courses", exact: true },
+  { href: "/feedback", label: "Feedback" },
 ];
 
 export default function Navbar({ user }: { user: User | null }) {
@@ -40,61 +62,90 @@ export default function Navbar({ user }: { user: User | null }) {
     setOpen(false);
   }, [pathname]);
 
-  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+  const isInAdmin = pathname.startsWith("/admin");
+  const isInDashboard = pathname.startsWith("/dashboard");
+  const isPanel = isInAdmin || isInDashboard;
+
+  const navItems = isInAdmin
+    ? adminLinks
+    : isInDashboard
+    ? studentLinks
+    : publicLinks;
 
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-m-medium ease-m-standard ${
         elevated
-          ? "bg-surface/75 backdrop-blur-xl border-b border-outline-variant/50 shadow-elev-1"
-          : "bg-surface/50 backdrop-blur-sm border-b border-transparent"
+          ? "bg-surface/85 backdrop-blur-xl border-b border-outline-variant/60 shadow-elev-1"
+          : "bg-surface/60 backdrop-blur-sm border-b border-transparent"
       }`}
     >
-      <nav className="container flex items-center justify-between h-16">
-        <Link href="/" className="flex items-center gap-3 group">
+      <nav className="container flex items-center justify-between h-16 gap-3">
+        {/* Brand — clicking CADers always takes you to the website homepage */}
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0" title="CADers Home">
           <img
             src="/logo.png"
             alt="CADers logo"
-            className="h-10 w-auto object-contain transition-transform duration-m-medium ease-m-standard group-hover:scale-105"
+            className="h-9 w-auto object-contain transition-transform duration-m-medium ease-m-standard group-hover:scale-105"
           />
           <div className="flex flex-col justify-center">
-            <span className="text-title-lg text-primary font-semibold leading-none">
+            <span className="text-title-lg text-primary font-semibold leading-none tracking-tight">
               CADers
             </span>
-            {user && (
-              <span className="text-[11px] uppercase tracking-widest text-primary/70 font-bold mt-1">
-                {isAdmin ? "Admin" : "Student"}
+            {isInAdmin ? (
+              <span className="text-[10px] uppercase tracking-wider text-primary font-bold mt-0.5">
+                Admin
               </span>
-            )}
+            ) : isInDashboard ? (
+              <span className="text-[10px] uppercase tracking-wider text-secondary font-bold mt-0.5">
+                Student
+              </span>
+            ) : user ? (
+              <span className="text-[10px] uppercase tracking-widest text-primary/70 font-bold mt-0.5">
+                {user.role === "admin" || user.role === "super_admin"
+                  ? "Admin"
+                  : "Student"}
+              </span>
+            ) : null}
           </div>
         </Link>
 
-        <ul className="hidden md:flex items-center gap-1">
-          {links.map((l) => {
-            const isAnchor = l.href.startsWith("/#");
-            const active = isAnchor
-              ? pathname === "/" && l.label === "Home"
-              : pathname.startsWith(l.href);
-              
+        {/* Center Nav: Contextual (Admin / Student / Public) */}
+        <ul className="hidden md:flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
+          {navItems.map((item) => {
+            let active = false;
+            if (isPanel) {
+              active = item.exact
+                ? pathname === item.href
+                : pathname.startsWith(item.href);
+            } else {
+              const isAnchor = item.href.startsWith("/#");
+              active = isAnchor
+                ? pathname === "/" && item.label === "Home"
+                : pathname.startsWith(item.href);
+            }
+
             return (
-              <li key={l.href}>
+              <li key={item.href} className="shrink-0">
                 <Link
-                  href={l.href}
-                  className={`relative px-4 py-2 rounded-full text-label-lg transition-all duration-m-short ease-m-standard ${
+                  href={item.href}
+                  className={`relative px-3.5 py-1.5 rounded-full text-label-md lg:text-label-lg transition-all duration-m-short ease-m-standard select-none whitespace-nowrap ${
                     active
-                      ? "text-primary bg-primary/10"
+                      ? "text-primary bg-primary/12 font-medium shadow-sm"
                       : "text-surface-on-variant hover:text-primary hover:bg-primary/5"
                   }`}
                 >
-                  {l.label}
+                  {item.label}
                 </Link>
               </li>
             );
           })}
         </ul>
 
-        <div className="hidden md:flex items-center gap-3">
+        {/* Right action group */}
+        <div className="hidden md:flex items-center gap-2.5 shrink-0">
           <ThemeToggle />
+
           {user ? (
             <UserMenu user={user} />
           ) : (
@@ -104,6 +155,7 @@ export default function Navbar({ user }: { user: User | null }) {
           )}
         </div>
 
+        {/* Mobile controls */}
         <div className="flex md:hidden items-center gap-1">
           <ThemeToggle />
           <button
@@ -111,32 +163,40 @@ export default function Navbar({ user }: { user: User | null }) {
             onClick={() => setOpen(!open)}
             aria-label="Toggle menu"
           >
-            {open ? <X /> : <Menu />}
+            {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>
 
+      {/* Mobile Drawer */}
       {open && (
         <div className="md:hidden border-t border-outline-variant bg-surface/95 backdrop-blur-xl">
           <ul className="container py-4 flex flex-col gap-1">
-            {links.map((l) => {
-              const isAnchor = l.href.startsWith("/#");
-              const active = isAnchor
-                ? pathname === "/" && l.label === "Home"
-                : pathname.startsWith(l.href);
-                
+            {navItems.map((item) => {
+              let active = false;
+              if (isPanel) {
+                active = item.exact
+                  ? pathname === item.href
+                  : pathname.startsWith(item.href);
+              } else {
+                const isAnchor = item.href.startsWith("/#");
+                active = isAnchor
+                  ? pathname === "/" && item.label === "Home"
+                  : pathname.startsWith(item.href);
+              }
+
               return (
-                <li key={l.href}>
+                <li key={item.href}>
                   <Link
-                    href={l.href}
+                    href={item.href}
                     onClick={() => setOpen(false)}
-                    className={`block px-4 py-3 rounded-full text-label-lg transition ${
+                    className={`block px-4 py-2.5 rounded-full text-label-lg transition ${
                       active
-                        ? "bg-primary/10 text-primary"
+                        ? "bg-primary/15 text-primary font-medium"
                         : "text-surface-on-variant hover:bg-primary/5 hover:text-primary"
                     }`}
                   >
-                    {l.label}
+                    {item.label}
                   </Link>
                 </li>
               );
@@ -161,16 +221,22 @@ export default function Navbar({ user }: { user: User | null }) {
 
                   <div className="mt-3 flex flex-col gap-1">
                     <Link
-                      href={isAdmin ? "/admin" : "/dashboard"}
+                      href={
+                        user.role === "admin" || user.role === "super_admin"
+                          ? "/admin"
+                          : "/dashboard"
+                      }
                       onClick={() => setOpen(false)}
-                      className="block px-4 py-3 rounded-full text-label-lg text-surface-on hover:bg-primary/10 hover:text-primary transition"
+                      className="block px-4 py-2.5 rounded-full text-label-lg text-surface-on hover:bg-primary/10 hover:text-primary transition"
                     >
-                      {isAdmin ? "Admin Panel" : "My Dashboard"}
+                      {user.role === "admin" || user.role === "super_admin"
+                        ? "Admin Panel"
+                        : "My Dashboard"}
                     </Link>
                     <form action={logoutAction}>
                       <button
                         type="submit"
-                        className="w-full text-left px-4 py-3 rounded-full text-label-lg text-red-600 dark:text-red-400 hover:bg-red-500/10 transition"
+                        className="w-full text-left px-4 py-2.5 rounded-full text-label-lg text-red-600 dark:text-red-400 hover:bg-red-500/10 transition"
                       >
                         Sign out
                       </button>
