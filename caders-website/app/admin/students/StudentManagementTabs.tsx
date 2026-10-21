@@ -51,7 +51,7 @@ export default function StudentManagementTabs({
       {activeTab === "bulk" ? (
         <BulkStudentImport courses={courses} />
       ) : (
-        <AddStudentForm />
+        <AddStudentForm courses={courses} />
       )}
     </div>
   );

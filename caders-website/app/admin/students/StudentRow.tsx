@@ -12,15 +12,16 @@ type Props = {
     roll_number: string | null;
     created_at: string;
   };
+  courses?: string[];
 };
 
-export default function StudentRow({ student }: Props) {
+export default function StudentRow({ student, courses = [] }: Props) {
   return (
     <tr className="hover:bg-surface-container-high/50 transition">
-      <td className="px-6 py-4 text-body-md text-surface-on">
+      <td className="px-6 py-4 text-body-md font-medium text-surface-on">
         {student.full_name}
       </td>
-      <td className="px-6 py-4 text-body-md text-surface-on-variant">
+      <td className="px-6 py-4 text-body-md font-mono text-primary">
         {student.username}
       </td>
       <td className="px-6 py-4 text-body-md text-surface-on-variant">
@@ -29,7 +30,23 @@ export default function StudentRow({ student }: Props) {
       <td className="px-6 py-4 text-body-md text-surface-on-variant">
         {student.roll_number || "—"}
       </td>
-      <td className="px-6 py-4 text-body-md text-surface-on-variant">
+      <td className="px-6 py-4">
+        {courses.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {courses.map((c) => (
+              <span
+                key={c}
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-surface-on-variant text-body-md">—</span>
+        )}
+      </td>
+      <td className="px-6 py-4 text-body-md text-surface-on-variant whitespace-nowrap">
         {new Date(student.created_at).toLocaleDateString("en-GB")}
       </td>
       <td className="px-6 py-4 text-right">

@@ -119,7 +119,7 @@ export default function BulkStudentImport({
             Bulk CSV Student Import & Auto-Enrollment
           </h3>
           <p className="text-body-md text-surface-on-variant mt-1">
-            Import hundreds of students at once. Usernames, emails, and secure passwords will be generated automatically.
+            Import students from any CSV or Google Forms export. Columns are automatically mapped: only <code className="text-primary font-mono text-xs">full_name</code>, <code className="text-primary font-mono text-xs">department</code>, and <code className="text-primary font-mono text-xs">roll_number</code> are extracted, while extra columns (Timestamp, Email, Section, etc.) are safely ignored. Passwords and usernames are generated automatically.
           </p>
         </div>
 
@@ -158,7 +158,7 @@ export default function BulkStudentImport({
               <p className="text-label-md text-surface-on-variant mt-1">
                 {selectedFile
                   ? `${(selectedFile.size / 1024).toFixed(1)} KB`
-                  : "Must include columns: full_name, department, roll_number"}
+                  : "Supports multi-column CSVs & Google Forms. Extracts: Name, Department, Roll"}
               </p>
             </div>
 

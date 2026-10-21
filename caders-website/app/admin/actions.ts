@@ -7,6 +7,7 @@ import { parse } from "csv-parse/sync";
 import {
   deriveSurname,
   buildUsernameBase,
+  normalizeDepartmentCode,
   USERNAME_DOMAIN,
 } from "@/lib/departments";
 
@@ -77,6 +78,7 @@ export async function createStudentAction(
     .trim()
     .toLowerCase();
   const providedPassword = String(formData.get("password") || "").trim();
+  const course_id = String(formData.get("course_id") || "").trim();
 
   if (!full_name || !surname_base || !dept_code || !roll_number || !username) {
     return {
@@ -127,12 +129,35 @@ export async function createStudentAction(
     return { error: createError?.message || "Failed to create user." };
   }
 
+  let courseName: string | null = null;
+  if (course_id) {
+    try {
+      const { data: courseData } = await admin
+        .from("courses")
+        .select("name")
+        .eq("id", course_id)
+        .maybeSingle();
+      courseName = courseData?.name ?? null;
+
+      await admin.from("enrollments").insert({
+        student_id: created.user.id,
+        course_id,
+      });
+    } catch {
+      /* ignore duplicate enrollment */
+    }
+  }
+
   revalidatePath("/admin/students");
+  revalidatePath("/admin/enrollments");
   revalidatePath("/admin");
+  revalidatePath("/dashboard");
+
+  const enrolledMsg = courseName ? ` and enrolled into "${courseName}"` : "";
 
   return {
     error: null,
-    success: `✅ Created "${email}". Password: "${password}" — copy it now; you won't see it again.`,
+    success: `✅ Created "${email}"${enrolledMsg}. Password: "${password}" — copy it now; you won't see it again.`,
   };
 }
 
@@ -685,19 +710,70 @@ function escapeCsvField(val: unknown): string {
 
 function extractCsvRowFields(row: Record<string, string>) {
   const keys = Object.keys(row);
-  const findValue = (...patterns: string[]) => {
-    for (const pat of patterns) {
-      const match = keys.find(
-        (k) => k.toLowerCase().trim().replace(/[^a-z0-9]/g, "") === pat
-      );
-      if (match && row[match] != null) return String(row[match]).trim();
+  const cleanKey = (k: string) => k.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  const findValue = (exactPatterns: string[], fallbackSub?: string) => {
+    // 1. Try exact matches on cleaned keys
+    for (const pat of exactPatterns) {
+      const match = keys.find((k) => cleanKey(k) === pat);
+      if (match && row[match] != null && String(row[match]).trim() !== "") {
+        return String(row[match]).trim();
+      }
+    }
+    // 2. Try substring match on cleaned keys (e.g. "what is your department?" contains "dept")
+    if (fallbackSub) {
+      const match = keys.find((k) => cleanKey(k).includes(fallbackSub));
+      if (match && row[match] != null && String(row[match]).trim() !== "") {
+        return String(row[match]).trim();
+      }
     }
     return "";
   };
 
-  const fullName = findValue("fullname", "name", "studentname", "student");
-  const department = findValue("department", "dept", "deptcode", "departmentcode").toUpperCase();
-  const rollNumber = findValue("rollnumber", "roll", "rollno", "id", "studentid", "studentroll");
+  const fullName = findValue(
+    [
+      "fullname",
+      "name",
+      "studentname",
+      "student",
+      "nameofstudent",
+      "studentsfullname",
+      "fullnames",
+    ],
+    "name"
+  );
+
+  const rawDepartment = findValue(
+    [
+      "department",
+      "dept",
+      "deptcode",
+      "departmentcode",
+      "discipline",
+      "selectyourdepartment",
+      "whatisyourdepartment",
+      "departmentname",
+    ],
+    "dept"
+  );
+
+  const rollNumber = findValue(
+    [
+      "rollnumber",
+      "roll",
+      "rollno",
+      "id",
+      "studentid",
+      "studentroll",
+      "classroll",
+      "kuetroll",
+      "rollnum",
+      "idnumber",
+    ],
+    "roll"
+  );
+
+  const department = normalizeDepartmentCode(rawDepartment);
 
   return { fullName, department, rollNumber };
 }

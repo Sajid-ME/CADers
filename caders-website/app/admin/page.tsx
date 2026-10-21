@@ -57,7 +57,7 @@ export default async function AdminOverviewPage() {
       label: "Courses",
       value: coursesRes.count ?? 0,
       icon: Trophy,
-      href: "/admin/enrollments",
+      href: "/admin/students?tab=courses",
       color: "bg-primary-container text-primary-on-container",
     },
   ];

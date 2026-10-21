@@ -9,7 +9,6 @@ import {
   DEPARTMENTS,
   USERNAME_DOMAIN,
   buildUsernameBase,
-  deriveRollSuffix,
   deriveSurname,
 } from "@/lib/departments";
 
@@ -25,7 +24,16 @@ function SubmitButton() {
   );
 }
 
-export default function AddStudentForm() {
+type CourseOption = {
+  id: string;
+  name: string;
+};
+
+export default function AddStudentForm({
+  courses = [],
+}: {
+  courses?: CourseOption[];
+}) {
   const [state, action] = useActionState(createStudentAction, initial);
   const [copied, setCopied] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -82,7 +90,7 @@ export default function AddStudentForm() {
 
   return (
     <div className="rounded-m-xl bg-surface-container border border-outline-variant p-6 md:p-8 shadow-elev-1">
-      <h3 className="text-title-md text-surface-on mb-6">Add a new student</h3>
+      <h3 className="text-title-md text-surface-on mb-6">Add a single student</h3>
 
       <form ref={formRef} action={action} className="grid gap-4 md:grid-cols-2">
         <div className="relative md:col-span-2">
@@ -196,7 +204,7 @@ export default function AddStudentForm() {
           )}
         </div>
 
-        <div className="relative md:col-span-2">
+        <div className="relative">
           <input
             id="password"
             name="password"
@@ -210,6 +218,29 @@ export default function AddStudentForm() {
           >
             Password (leave blank to auto-generate)
           </label>
+        </div>
+
+        {/* Auto-enroll in Course during single student creation */}
+        <div>
+          <label
+            htmlFor="course_id"
+            className="block text-label-md text-surface-on-variant mb-1.5"
+          >
+            Auto-enroll in Course (Optional)
+          </label>
+          <select
+            id="course_id"
+            name="course_id"
+            defaultValue=""
+            className="w-full rounded-m-md bg-surface-variant border border-outline px-4 py-3 text-body-lg text-surface-on focus:outline-none focus:border-primary focus:border-2 transition-all duration-m-short ease-m-standard appearance-none"
+          >
+            <option value="">None (Create account only)</option>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {state.error && (

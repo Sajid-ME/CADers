@@ -32,8 +32,7 @@ const publicLinks: NavItem[] = [
 
 const adminLinks: NavItem[] = [
   { href: "/admin", label: "Overview", exact: true },
-  { href: "/admin/students", label: "Students" },
-  { href: "/admin/enrollments", label: "Enrollments" },
+  { href: "/admin/students", label: "Students & Courses" },
   { href: "/admin/materials", label: "Materials" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/achievements", label: "Achievements" },

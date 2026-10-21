@@ -112,12 +112,6 @@ export default function Footer() {
               <br />
               Khulna 9203, Bangladesh
             </p>
-            <a
-              href="mailto:caders.kuet@gmail.com"
-              className="hover:text-primary transition-colors"
-            >
-              caders.kuet@gmail.com
-            </a>
           </address>
           <a
             href="https://kuet.ac.bd"

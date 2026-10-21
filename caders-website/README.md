@@ -18,8 +18,9 @@ Official web platform for **CADers, Khulna University of Engineering & Technolog
 - **Clean Contextual Navigation**: Dedicated student workspace header with a 1-click CADers logo shortcut back to the public homepage.
 
 ### 🛡️ Admin Management Suite (`/admin`)
-- **Single Unified Header**: Clean single-row contextual navigation (`Overview`, `Students`, `Enrollments`, `Materials`, `Events`, `Achievements`, `Voices`, `Login Logs`).
-- **Student Management**: Automated username generator (`<surname><dept><roll>@caders.kuet`), auto password generation, and batch enrollment.
+- **Single Unified Header**: Clean single-row contextual navigation (`Overview`, `Students & Courses`, `Materials`, `Events`, `Achievements`, `Voices`, `Login Logs`).
+- **Merged Student & Enrollment Management**: Admins can create single student accounts and auto-enroll them into a course in a single click, or use batch CSV imports.
+- **Robust Multi-Column CSV Import**: Supports Google Forms and raw spreadsheet exports with arbitrary column counts (Timestamp, Email, Section, Phone, etc.). The engine automatically isolates `full_name`, `department` (normalized to KUET department codes), and `roll_number`, generates secure passwords, enrolls students in bulk, and produces a downloadable credentials CSV.
 - **Course & File Management**: Direct PDF, PPT(X), DOC(X), ZIP uploads (up to 20MB) directly into private Supabase storage.
 - **Event & Achievement Editor**: Real-time CRUD operations reflecting instantly on the public website.
 - **Audit & Security Logs**: Tracks user logins with timestamps and user-agent metadata.

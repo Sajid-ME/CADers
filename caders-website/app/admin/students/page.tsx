@@ -1,12 +1,11 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import StudentManagementTabs from "./StudentManagementTabs";
-import StudentRow from "./StudentRow";
-import ExportStudentsCsvButton from "./ExportStudentsCsvButton";
+import AdminStudentsHub from "./AdminStudentsHub";
 
 export default async function AdminStudentsPage() {
   const supabase = await createClient();
 
-  const [studentsRes, coursesRes] = await Promise.all([
+  const [studentsRes, coursesRes, enrollmentsRes] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, username, full_name, department, roll_number, created_at")
@@ -14,58 +13,56 @@ export default async function AdminStudentsPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("courses")
-      .select("id, name")
+      .select("id, name, order_index")
       .order("order_index", { ascending: true }),
+    supabase
+      .from("enrollments")
+      .select(
+        "id, enrolled_at, student:student_id (id, username, full_name), course:course_id (id, name)"
+      )
+      .order("enrolled_at", { ascending: false }),
   ]);
 
   const students = studentsRes.data ?? [];
   const courses = coursesRes.data ?? [];
+  const enrollments = enrollmentsRes.data ?? [];
+
+  // Build map of student_id -> course names
+  const studentCourseMap: Record<string, string[]> = {};
+  for (const e of enrollments) {
+    const studentId = (e.student as any)?.id;
+    const courseName = (e.course as any)?.name;
+    if (studentId && courseName) {
+      if (!studentCourseMap[studentId]) {
+        studentCourseMap[studentId] = [];
+      }
+      studentCourseMap[studentId].push(courseName);
+    }
+  }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div>
-        <h2 className="text-headline-md text-surface-on">Students</h2>
+        <h2 className="text-headline-md text-surface-on">Students & Courses</h2>
         <p className="text-body-md text-surface-on-variant mt-1">
-          Create single accounts, bulk import from CSV with auto-enrollment, and export credentials.
+          Manage students, batch CSV imports with auto-enrollment, course catalogs, and active enrollments.
         </p>
       </div>
 
-      <StudentManagementTabs courses={courses} />
-
-      <div className="rounded-m-xl bg-surface-container border border-outline-variant overflow-hidden shadow-elev-1">
-        <div className="px-6 py-4 border-b border-outline-variant flex items-center justify-between">
-          <h3 className="text-title-md text-surface-on">
-            All students ({students.length})
-          </h3>
-          <ExportStudentsCsvButton students={students} />
-        </div>
-
-        {students.length === 0 ? (
-          <div className="p-10 text-center text-body-md text-surface-on-variant">
-            No students yet. Create or import above.
+      <Suspense
+        fallback={
+          <div className="p-8 text-center text-surface-on-variant">
+            Loading student and course management...
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-surface-container-high">
-                <tr className="text-label-md text-surface-on-variant uppercase">
-                  <th className="px-6 py-3">Name</th>
-                  <th className="px-6 py-3">Username</th>
-                  <th className="px-6 py-3">Department</th>
-                  <th className="px-6 py-3">Roll</th>
-                  <th className="px-6 py-3">Created</th>
-                  <th className="px-6 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant">
-                {students.map((s) => (
-                  <StudentRow key={s.id} student={s} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+        }
+      >
+        <AdminStudentsHub
+          students={students}
+          courses={courses}
+          enrollments={enrollments}
+          studentCourseMap={studentCourseMap}
+        />
+      </Suspense>
     </div>
   );
 }
